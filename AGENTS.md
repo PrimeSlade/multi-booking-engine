@@ -1,48 +1,67 @@
-# Agent Guidelines & Project Instructions
+# Root Agent Guidelines & Monorepo Instructions
 
 ## Critical Directive: Code Preservation
 - **Source of Truth**: The latest code in the repository is the primary source of truth.
 - **Strict Constraint**: Do NOT modify, rewrite, or delete existing code unless explicitly instructed by the user.
-- **Additive Development**: Prefer adding new endpoints, handlers, modules, or services without altering working logic unless directly requested.
+- **Additive Development**: Prefer adding new endpoints, components, modules, or services without altering working logic unless directly requested.
 
 ---
 
-## Project Overview
-`multi-booking-engine` is a NestJS-based booking orchestration service utilizing PostgreSQL via Prisma ORM and RabbitMQ for asynchronous step processing.
+## Monorepo Overview
+This project is a `pnpm` workspace monorepo containing the following applications:
 
-### Tech Stack
-- **Framework**: NestJS (v11)
-- **Language**: TypeScript (with strict typing)
-- **Database**: PostgreSQL with Prisma ORM
-- **Message Broker**: RabbitMQ (`amqp-connection-manager`, `amqplib`)
-- **Package Manager**: `pnpm`
-- **Code Quality**: ESLint (Flat config), Prettier, Husky, and `lint-staged`
+```text
+.
+├── apps/
+│   ├── api/          # NestJS backend (Booking Orchestration Engine)
+│   └── web/          # Minimal React + Vite frontend
+├── docker-compose.yml # Shared Postgres & RabbitMQ infrastructure
+├── pnpm-workspace.yaml
+├── package.json
+└── AGENTS.md          # Monorepo root guidelines
+```
 
 ---
 
-## Development Commands
+## Directory-Level Agent Guidelines
+Detailed domain instructions are maintained within each app's directory level:
+- **Backend Guidelines**: See [apps/api/AGENTS.md](file:///Users/saizayarhein/Desktop/mutli-booking-engine/apps/api/AGENTS.md) for NestJS, Prisma, PostgreSQL, and RabbitMQ standards.
+- **Frontend Guidelines**: See [apps/web/AGENTS.md](file:///Users/saizayarhein/Desktop/mutli-booking-engine/apps/web/AGENTS.md) for React, Vite, and UI standards.
 
-Always use `pnpm` for scripts and package operations:
+---
+
+## Monorepo Development Commands
+
+Always use `pnpm` from the monorepo root:
 
 ```bash
-# Development
-pnpm run start:dev
+# Install all dependencies across workspaces
+pnpm install
 
-# Build
-pnpm run build
+# Run development servers
+pnpm dev              # Run both api and web concurrently
+pnpm dev:api          # Run NestJS backend only
+pnpm dev:web          # Run React frontend only
 
-# Linting & Formatting
-pnpm run lint
-pnpm run format
+# Build all applications
+pnpm build            # Build all packages in topological order
+pnpm build:api        # Build backend only
+pnpm build:web        # Build frontend only
 
-# Testing
-pnpm test
-pnpm run test:e2e
+# Linting
+pnpm lint             # Lint all workspace packages
+
+# Infrastructure (PostgreSQL + RabbitMQ)
+docker-compose up -d
+docker-compose down
 ```
 
 ---
 
 ## Git & Commit Standards
-- **Commit Format**: Follow Conventional Commits (e.g., `feat:`, `fix:`, `chore:`, `feat(scope):`).
-- **Pre-commit Hooks**: Husky runs `lint-staged` automatically on commit to format and lint staged files (`prettier --write` and `eslint --fix`).
-- Keep commits atomic and cleanly scoped.
+- **Commit Format**: Follow Conventional Commits with scope prefixes:
+  - `feat(api):` or `fix(api):` for backend changes
+  - `feat(web):` or `fix(web):` for frontend changes
+  - `feat(infra):` for Docker / environment changes
+  - `chore(monorepo):` or `docs:` for root / documentation updates
+- **Pre-commit Hooks**: Husky runs `lint-staged` on staged files before each commit.
