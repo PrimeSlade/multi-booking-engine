@@ -1,98 +1,128 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Multi-Booking Engine
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A distributed, multi-product booking orchestration engine designed to coordinate complex, multi-step booking workflows (e.g., hotels, flights) with transactional integrity, asynchronous step routing, and compensating actions (Saga pattern).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Overview
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+The **Multi-Booking Engine** processes multi-product travel bookings through a staged execution graph. Each booking generates discrete lifecycle steps (`availability`, `fraud`, `payment`, `allotment`, `notify`) that are dispatched asynchronously across RabbitMQ message queues and tracked in PostgreSQL via Prisma ORM for idempotency, automatic retries, and compensation on failure.
 
-## Project setup
+The repository is structured as a **pnpm monorepo** containing both the NestJS orchestration backend and a minimal React client.
 
-```bash
-$ npm install
+---
+
+## Tech Stack
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Backend (`apps/api`)** | [NestJS 11](https://nestjs.com/), TypeScript, [Prisma ORM](https://www.prisma.io/), `class-validator`, `class-transformer` |
+| **Frontend (`apps/web`)** | [React 19](https://react.dev/), [Vite](https://vitejs.dev/), TypeScript |
+| **Message Broker** | [RabbitMQ 3.13](https://www.rabbitmq.com/) (`amqp-connection-manager`, `amqplib`) |
+| **Database** | [PostgreSQL 16](https://www.postgresql.org/) |
+| **Monorepo & Tooling** | `pnpm` Workspaces, Docker Compose, ESLint (Flat Config), Prettier, Husky, `lint-staged` |
+
+---
+
+## Monorepo Architecture
+
+```text
+.
+├── apps/
+│   ├── api/                    # NestJS Orchestration Service (@booking/api)
+│   │   ├── prisma/             # Schema & PostgreSQL migrations
+│   │   ├── src/                # Controllers, services, modules, & DTOs
+│   │   ├── test/               # Unit & E2E tests
+│   │   └── AGENTS.md           # Backend agent instructions
+│   │
+│   └── web/                    # Minimal React UI (@booking/web)
+│       ├── src/                # React components, styles, and client entry
+│       ├── vite.config.ts
+│       └── AGENTS.md           # Frontend agent instructions
+│
+├── docker-compose.yml          # PostgreSQL & RabbitMQ services
+├── pnpm-workspace.yaml         # pnpm workspace definition
+├── package.json                # Monorepo root scripts & git hooks
+├── AGENTS.md                   # Monorepo root guidelines
+└── README.md
 ```
 
-## Compile and run the project
+---
 
+## Getting Started
+
+### Prerequisites
+- **Node.js**: `v20+` or `v22+`
+- **pnpm**: `v10+`
+- **Docker** & **Docker Compose**
+
+### 1. Install Dependencies
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+pnpm install
 ```
 
-## Run tests
-
+### 2. Start Infrastructure
+Launch PostgreSQL and RabbitMQ containers:
 ```bash
-# unit tests
-$ npm run test
+docker-compose up -d
+```
+- **PostgreSQL**: `localhost:5432` (`booking_engine`)
+- **RabbitMQ AMQP**: `localhost:5672`
+- **RabbitMQ Management UI**: `http://localhost:15672` (User: `guest` / Pass: `guest`)
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+### 3. Configure Environment
+Copy `.env.example` to `.env` in `apps/api/`:
+```bash
+cp apps/api/.env.example apps/api/.env
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### 4. Run Database Migrations
+Apply Prisma migrations to the PostgreSQL database:
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+pnpm --filter @booking/api prisma:migrate
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 5. Start Development Servers
+```bash
+# Run both Backend and Frontend concurrently
+pnpm dev
 
-## Resources
+# Or run services individually
+pnpm dev:api    # NestJS API -> http://localhost:3000
+pnpm dev:web    # React Web  -> http://localhost:5173
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Available Scripts
 
-## Support
+All scripts can be executed from the monorepo root:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+| Command | Description |
+| :--- | :--- |
+| `pnpm dev` | Starts both `api` and `web` concurrently |
+| `pnpm dev:api` | Starts the NestJS backend with watch mode |
+| `pnpm dev:web` | Starts the Vite React frontend |
+| `pnpm build` | Builds all packages (`api` and `web`) in topological order |
+| `pnpm build:api` | Compiles the NestJS backend (`nest build`) |
+| `pnpm build:web` | Compiles the React frontend (`tsc -b && vite build`) |
+| `pnpm lint` | Lints all packages with ESLint |
+| `pnpm format` | Formats codebase with Prettier |
+| `pnpm test` | Runs backend unit tests |
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Workflow & Step Lifecycle
 
-## License
+The engine coordinates bookings via stateful stages:
+1. **Initiate Booking**: Validates input products (`hotel`, `flight`) and saves `Booking` record in `in_progress` status.
+2. **Step Execution**: Generates sequential and parallel steps (`BookingStep`) routed to target agents via RabbitMQ.
+3. **Status Transitions**: `pending` $\rightarrow$ `in_progress` $\rightarrow$ `success` / `failed`.
+4. **Compensation**: In case of failures or partial allotments, triggers compensating transactions (`compensating` $\rightarrow$ `compensated`).
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---
+
+## Code Quality & Pre-commit Hooks
+
+- **Husky** and **lint-staged** are configured in the root repository.
+- On each `git commit`, staged TypeScript/JavaScript files are automatically formatted with Prettier and checked with ESLint before the commit is finalized.
