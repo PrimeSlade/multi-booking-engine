@@ -1,6 +1,7 @@
 # Backend Agent Guidelines (apps/api)
 
 ## Critical Directive: Code Preservation
+
 - **Source of Truth**: The latest code in `apps/api` is the source of truth for the backend service.
 - **Strict Constraint**: Do NOT modify, rewrite, or delete existing endpoints, services, controllers, DTOs, or database schemas unless explicitly instructed by the user.
 - **Additive Development**: Add new handlers, controllers, modules, or workflow steps additively without altering working functionality.
@@ -8,9 +9,11 @@
 ---
 
 ## Service Overview
+
 `@booking/api` is the backend orchestration service for the multi-booking engine.
 
 ### Tech Stack
+
 - **Framework**: NestJS (v11)
 - **Language**: TypeScript (strict mode)
 - **Database**: PostgreSQL with Prisma ORM
@@ -20,6 +23,7 @@
 ---
 
 ## Data Architecture & Workflow
+
 - **Prisma Schema**: Located in [apps/api/prisma/schema.prisma](file:///Users/saizayarhein/Desktop/mutli-booking-engine/apps/api/prisma/schema.prisma)
   - `Booking`: Represents overall itinerary booking with status (`in_progress`, `awaiting_user_decision`, `partially_confirmed`, `confirmed`, `failed`).
   - `BookingStep`: Represents individual steps in the workflow with status (`pending`, `in_progress`, `success`, `failed`, `compensating`, `compensated`).
@@ -54,6 +58,7 @@ pnpm run prisma:migrate
 ---
 
 ## Coding Standards
+
 1. **DTOs**: Every incoming request must be validated using typed DTOs with `class-validator` decorators.
 2. **Modular Architecture**: Separate concerns cleanly between Controllers, Services, and Modules.
 3. **Error Handling**: Use NestJS built-in HTTP exceptions and structured error responses.

@@ -13,6 +13,8 @@
 
 A distributed, multi-product booking orchestration engine designed to coordinate complex, multi-step booking workflows (e.g., hotels, flights) with transactional integrity, asynchronous step routing, and compensating actions (Saga pattern).
 
+> [!NOTE]
+> **Project Scope**: This project is **not** a full travel platform or end-to-end booking site. It focuses exclusively on the core **orchestration engine** behind multi-product bookings — managing complex distributed lifecycles, staged execution graphs, asynchronous message queues, idempotency, and saga-pattern compensations.
 
 ---
 
