@@ -1,0 +1,116 @@
+// use prisma-next
+
+enum BookingStatus {
+  @@type("pg/text@1")
+  in_progress            = "in_progress"
+  awaiting_user_decision = "awaiting_user_decision"
+  partially_confirmed    = "partially_confirmed"
+  confirmed              = "confirmed"
+  failed                 = "failed"
+}
+
+enum StepScope {
+  @@type("pg/text@1")
+  product   = "product"
+  itinerary = "itinerary"
+}
+
+enum StepStatus {
+  @@type("pg/text@1")
+  pending      = "pending"
+  in_progress  = "in_progress"
+  success      = "success"
+  failed       = "failed"
+  compensating = "compensating"
+  compensated  = "compensated"
+}
+
+model Booking {
+  id       String @id @default(uuid())
+  userId   String @map("user_id")
+  products Json
+
+  status            BookingStatus      @default(in_progress)
+  decisionExpiresAt TimestamptzString? @map("decision_expires_at")
+
+  createdAt TimestamptzString          @default(now()) @map("created_at")
+  updatedAt temporal.updatedAtString() @map("updated_at")
+
+  steps BookingStep[]
+
+  @@map("booking")
+}
+
+model BookingStep {
+  id        String  @id @default(uuid())
+  bookingId String  @map("booking_id")
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
+  stepIndex Int       @map("step_index")
+  stage     Int
+  stepName  String    @map("step_name")
+  scope     StepScope
+  product   String?
+  agent     String
+
+  status    StepStatus                 @default(pending)
+  attempt   Int                        @default(0)
+  retryable Boolean?
+  result    Json?
+  error     Json?
+  updatedAt temporal.updatedAtString() @map("updated_at")
+
+  @@unique([bookingId, stepName])
+  @@index([bookingId])
+  @@index([status])
+  @@index([bookingId, stage])
+  @@map("booking_step")
+}
+
+model Hotel {
+  id   String @id
+  name String
+  city String
+
+  rooms Room[]
+
+  @@map("hotel")
+}
+
+model Room {
+  id      String @id
+  hotelId String @map("hotel_id")
+  hotel   Hotel  @relation(fields: [hotelId], references: [id])
+
+  roomType  String  @map("room_type")
+  price     Decimal
+  available Boolean @default(true)
+
+  @@index([hotelId])
+  @@map("room")
+}
+
+model Airline {
+  id   String @id
+  name String
+
+  flights Flight[]
+
+  @@map("airline")
+}
+
+model Flight {
+  id        String  @id
+  airlineId String  @map("airline_id")
+  airline   Airline @relation(fields: [airlineId], references: [id])
+
+  flightNumber  String            @map("flight_number")
+  origin        String
+  destination   String
+  departureTime TimestamptzString @map("departure_time")
+  price         Decimal
+  seatsLeft     Int               @map("seats_left")
+
+  @@index([airlineId])
+  @@map("flight")
+}

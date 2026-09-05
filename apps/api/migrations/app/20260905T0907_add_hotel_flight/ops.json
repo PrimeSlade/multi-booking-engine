@@ -1,0 +1,616 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.airline",
+    "label": "Create table \"airline\"",
+    "summary": "Creates table \"airline\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "airline"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"airline\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"airline\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"airline\"",
+        "sql": "CREATE TABLE \"public\".\"airline\" (\n  \"id\" text NOT NULL,\n  \"name\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"airline\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"airline\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.booking",
+    "label": "Create table \"booking\"",
+    "summary": "Creates table \"booking\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "booking"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"booking\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"booking\"",
+        "sql": "CREATE TABLE \"public\".\"booking\" (\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"decision_expires_at\" timestamptz,\n  \"id\" text NOT NULL,\n  \"products\" json NOT NULL,\n  \"status\" text DEFAULT 'in_progress' NOT NULL,\n  \"updated_at\" timestamptz NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"booking_status_check_7293a702\" CHECK (\"status\" IN ('in_progress', 'awaiting_user_decision', 'partially_confirmed', 'confirmed', 'failed'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"booking\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.booking_step",
+    "label": "Create table \"booking_step\"",
+    "summary": "Creates table \"booking_step\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "booking_step"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"booking_step\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_step\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"booking_step\"",
+        "sql": "CREATE TABLE \"public\".\"booking_step\" (\n  \"agent\" text NOT NULL,\n  \"attempt\" int4 DEFAULT 0 NOT NULL,\n  \"booking_id\" text NOT NULL,\n  \"error\" json,\n  \"id\" text NOT NULL,\n  \"product\" text,\n  \"result\" json,\n  \"retryable\" bool,\n  \"scope\" text NOT NULL,\n  \"stage\" int4 NOT NULL,\n  \"status\" text DEFAULT 'pending' NOT NULL,\n  \"step_index\" int4 NOT NULL,\n  \"step_name\" text NOT NULL,\n  \"updated_at\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"booking_step_scope_check_7140f2cf\" CHECK (\"scope\" IN ('product', 'itinerary')),\n  CONSTRAINT \"booking_step_status_check_aee21de6\" CHECK (\"status\" IN ('pending', 'in_progress', 'success', 'failed', 'compensating', 'compensated'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"booking_step\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_step\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.flight",
+    "label": "Create table \"flight\"",
+    "summary": "Creates table \"flight\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "flight"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"flight\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"flight\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"flight\"",
+        "sql": "CREATE TABLE \"public\".\"flight\" (\n  \"airline_id\" text NOT NULL,\n  \"departure_time\" timestamptz NOT NULL,\n  \"destination\" text NOT NULL,\n  \"flight_number\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"origin\" text NOT NULL,\n  \"price\" numeric NOT NULL,\n  \"seats_left\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"flight\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"flight\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.hotel",
+    "label": "Create table \"hotel\"",
+    "summary": "Creates table \"hotel\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "hotel"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"hotel\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"hotel\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"hotel\"",
+        "sql": "CREATE TABLE \"public\".\"hotel\" (\n  \"city\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"name\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"hotel\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"hotel\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.room",
+    "label": "Create table \"room\"",
+    "summary": "Creates table \"room\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "room"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"room\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"room\"",
+        "sql": "CREATE TABLE \"public\".\"room\" (\n  \"available\" bool DEFAULT true NOT NULL,\n  \"hotel_id\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"price\" numeric NOT NULL,\n  \"room_type\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"room\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.booking_step.booking_step_booking_id_step_name_key",
+    "label": "Add unique constraint on \"booking_step\" (booking_id, step_name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "booking_step_booking_id_step_name_key",
+        "table": "booking_step"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"booking_step_booking_id_step_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_step_booking_id_step_name_key",
+          "public",
+          "\"public\".\"booking_step\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"booking_step_booking_id_step_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"booking_step\" ADD CONSTRAINT \"booking_step_booking_id_step_name_key\" UNIQUE (\"booking_id\", \"step_name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"booking_step_booking_id_step_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_step_booking_id_step_name_key",
+          "public",
+          "\"public\".\"booking_step\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.booking_step.booking_step_booking_id_idx_aeea169b",
+    "label": "Create index \"booking_step_booking_id_idx_aeea169b\" on \"booking_step\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "booking_step_booking_id_idx_aeea169b",
+        "table": "booking_step"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"booking_step_booking_id_idx_aeea169b\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_step_booking_id_idx_aeea169b\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"booking_step_booking_id_idx_aeea169b\"",
+        "sql": "CREATE INDEX \"booking_step_booking_id_idx_aeea169b\" ON \"public\".\"booking_step\" (\"booking_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"booking_step_booking_id_idx_aeea169b\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_step_booking_id_idx_aeea169b\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.booking_step.booking_step_booking_id_stage_idx_90ddef17",
+    "label": "Create index \"booking_step_booking_id_stage_idx_90ddef17\" on \"booking_step\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "booking_step_booking_id_stage_idx_90ddef17",
+        "table": "booking_step"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"booking_step_booking_id_stage_idx_90ddef17\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_step_booking_id_stage_idx_90ddef17\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"booking_step_booking_id_stage_idx_90ddef17\"",
+        "sql": "CREATE INDEX \"booking_step_booking_id_stage_idx_90ddef17\" ON \"public\".\"booking_step\" (\"booking_id\", \"stage\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"booking_step_booking_id_stage_idx_90ddef17\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_step_booking_id_stage_idx_90ddef17\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.booking_step.booking_step_status_idx_e98638ab",
+    "label": "Create index \"booking_step_status_idx_e98638ab\" on \"booking_step\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "booking_step_status_idx_e98638ab",
+        "table": "booking_step"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"booking_step_status_idx_e98638ab\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_step_status_idx_e98638ab\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"booking_step_status_idx_e98638ab\"",
+        "sql": "CREATE INDEX \"booking_step_status_idx_e98638ab\" ON \"public\".\"booking_step\" (\"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"booking_step_status_idx_e98638ab\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_step_status_idx_e98638ab\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.flight.flight_airline_id_idx_1844ec6e",
+    "label": "Create index \"flight_airline_id_idx_1844ec6e\" on \"flight\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "flight_airline_id_idx_1844ec6e",
+        "table": "flight"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"flight_airline_id_idx_1844ec6e\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"flight_airline_id_idx_1844ec6e\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"flight_airline_id_idx_1844ec6e\"",
+        "sql": "CREATE INDEX \"flight_airline_id_idx_1844ec6e\" ON \"public\".\"flight\" (\"airline_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"flight_airline_id_idx_1844ec6e\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"flight_airline_id_idx_1844ec6e\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.room.room_hotel_id_idx_3d513303",
+    "label": "Create index \"room_hotel_id_idx_3d513303\" on \"room\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "room_hotel_id_idx_3d513303",
+        "table": "room"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"room_hotel_id_idx_3d513303\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_hotel_id_idx_3d513303\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"room_hotel_id_idx_3d513303\"",
+        "sql": "CREATE INDEX \"room_hotel_id_idx_3d513303\" ON \"public\".\"room\" (\"hotel_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"room_hotel_id_idx_3d513303\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_hotel_id_idx_3d513303\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.booking_step.booking_step_booking_id_fkey",
+    "label": "Add foreign key \"booking_step_booking_id_fkey\" on \"booking_step\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "booking_step_booking_id_fkey",
+        "table": "booking_step"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"booking_step_booking_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_step_booking_id_fkey",
+          "public",
+          "\"public\".\"booking_step\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"booking_step_booking_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"booking_step\"\nADD CONSTRAINT \"booking_step_booking_id_fkey\"\nFOREIGN KEY (\"booking_id\")\nREFERENCES \"public\".\"booking\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"booking_step_booking_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_step_booking_id_fkey",
+          "public",
+          "\"public\".\"booking_step\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.flight.flight_airline_id_fkey",
+    "label": "Add foreign key \"flight_airline_id_fkey\" on \"flight\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "flight_airline_id_fkey",
+        "table": "flight"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"flight_airline_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "flight_airline_id_fkey",
+          "public",
+          "\"public\".\"flight\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"flight_airline_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"flight\"\nADD CONSTRAINT \"flight_airline_id_fkey\"\nFOREIGN KEY (\"airline_id\")\nREFERENCES \"public\".\"airline\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"flight_airline_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "flight_airline_id_fkey",
+          "public",
+          "\"public\".\"flight\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.room.room_hotel_id_fkey",
+    "label": "Add foreign key \"room_hotel_id_fkey\" on \"room\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "room_hotel_id_fkey",
+        "table": "room"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"room_hotel_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_hotel_id_fkey",
+          "public",
+          "\"public\".\"room\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"room_hotel_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"room\"\nADD CONSTRAINT \"room_hotel_id_fkey\"\nFOREIGN KEY (\"hotel_id\")\nREFERENCES \"public\".\"hotel\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"room_hotel_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_hotel_id_fkey",
+          "public",
+          "\"public\".\"room\""
+        ]
+      }
+    ]
+  }
+]

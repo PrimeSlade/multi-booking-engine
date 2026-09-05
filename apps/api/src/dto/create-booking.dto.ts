@@ -9,11 +9,9 @@ import {
 
 export class CreateBookingDto {
   @IsString()
-  @IsOptional()
   bookingId?: string;
 
   @IsEmail()
-  @IsNotEmpty()
   customerEmail: string;
 
   @IsString()

@@ -40,3 +40,12 @@ logs
 
 # Docker
 .docker/
+
+# Prisma 8 generated agent skills - regeneratable via `pnpm --filter @booking/api skills:sync`
+apps/api/.agents/
+apps/api/.claude/
+apps/api/.cursor/
+apps/api/.devin/
+
+# Opencode (optional - uncomment if you want local-only)
+# opencode.json
