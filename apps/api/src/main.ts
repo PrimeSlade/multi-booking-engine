@@ -8,10 +8,6 @@ import { ResponseInterceptor } from '@/common/interceptors/response.interceptor'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
-  // Docs-aligned logger backend: buffered startup logs + JSON output for
-  // framework logs and every `new Logger(...)` (interceptors, filter).
-  app.useLogger(new ConsoleLogger({ json: true }));
-
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
