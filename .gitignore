@@ -47,5 +47,9 @@ apps/api/.claude/
 apps/api/.cursor/
 apps/api/.devin/
 
+# Third-party agent skills - reinstall via `npx skills install` (pinned in skills-lock.json)
+.agents/
+.claude/
+
 # Opencode (optional - uncomment if you want local-only)
 # opencode.json

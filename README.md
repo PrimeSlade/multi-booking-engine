@@ -74,6 +74,12 @@ The repository is structured as a **pnpm monorepo** containing both the NestJS o
 pnpm install
 ```
 
+### 1b. Install Agent Skills (optional)
+Restore pinned third-party agent skills (NestJS, RabbitMQ) for AI-assisted development:
+```bash
+npx skills install
+```
+
 ### 2. Start Infrastructure
 Launch PostgreSQL and RabbitMQ containers:
 ```bash
