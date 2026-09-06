@@ -1,0 +1,119 @@
+# Booking execution graph definition.
+# Single source of truth for GraphBuilder + Orchestrator.
+# Edit safely: validated with zod on startup and on POST /admin/graph/reload.
+# In-flight bookings keep a snapshot of `version`, so edits only affect new bookings.
+#
+# Retry semantics: `retry.max/backoffMs` is the policy applied ONLY if the
+# agent reports the failure as retryable (error.retryable=true in the
+# completion payload, e.g. GATEWAY_TIMEOUT). Non-retryable failures
+# (e.g. NO_AVAILABILITY) fail immediately regardless of max.
+# The orchestrator checks message retryable + attempt < max.
+#
+# Routing convention:
+#   dispatch:   booking.step.<product>.<stepName>
+#   completion: booking.step.completed.<product>.<stepName>
+#   compensate: booking.step.compensate.<product>.<stepName>
+
+version: 1
+
+products:
+  flight:
+    steps:
+      - stepName: availability
+        agent: flight-agent
+        scope: product
+        routingKey: booking.step.flight.availability
+        timeoutMs: 5000
+        retry:
+          max: 3
+          backoffMs: 1000
+      - stepName: allotment
+        agent: flight-agent
+        scope: product
+        routingKey: booking.step.flight.allotment
+        timeoutMs: 8000
+        retry:
+          max: 2
+          backoffMs: 2000
+        compensate: release_seat
+
+  hotel:
+    steps:
+      - stepName: availability
+        agent: hotel-agent
+        scope: product
+        routingKey: booking.step.hotel.availability
+        timeoutMs: 5000
+        retry:
+          max: 3
+          backoffMs: 1000
+      - stepName: allotment
+        agent: hotel-agent
+        scope: product
+        routingKey: booking.step.hotel.allotment
+        timeoutMs: 8000
+        retry:
+          max: 2
+          backoffMs: 2000
+        compensate: release_room
+
+itinerary:
+  stages:
+    - stage: 0
+      policy: parallel
+      steps:
+        - flight.availability
+        - hotel.availability
+    - stage: 1
+      policy: sequential
+      steps:
+        - itinerary.fraud
+    - stage: 2
+      policy: parallel
+      join: all_or_ask
+      steps:
+        - flight.allotment
+        - hotel.allotment
+    - stage: 3
+      policy: sequential
+      steps:
+        - itinerary.payment
+    - stage: 4
+      policy: sequential
+      steps:
+        - itinerary.notify
+
+  sharedSteps:
+    itinerary.fraud:
+      agent: fraud-agent
+      scope: itinerary
+      routingKey: booking.step.itinerary.fraud
+      timeoutMs: 4000
+      retry:
+        max: 2
+        backoffMs: 1000
+    itinerary.payment:
+      agent: payment-agent
+      scope: itinerary
+      routingKey: booking.step.itinerary.payment
+      timeoutMs: 10000
+      retry:
+        max: 2
+        backoffMs: 2000
+      compensate: refund_payment
+    itinerary.notify:
+      agent: notify-agent
+      scope: itinerary
+      routingKey: booking.step.itinerary.notify
+      timeoutMs: 3000
+      retry:
+        max: 3
+        backoffMs: 1000
+
+  # Barrier rule for parallel merges (stage 2):
+  # all success -> next stage, else -> awaiting_user_decision.
+  onPartialFailure: awaiting_user_decision
+  # Client decision window. Maps to Booking.decisionExpiresAt.
+  decisionTtlMs: 900000
+  # No client reply within TTL, or explicit deny both.
+  onDecisionTimeout: reject_all_and_compensate
