@@ -4,9 +4,8 @@
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=nodedotjs)](https://nodejs.org/)
 [![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs)](https://nestjs.com/)
-[![Prisma](https://img.shields.io/badge/Prisma-6.19-2D3748?logo=prisma)](https://www.prisma.io/)
+[![Prisma](https://img.shields.io/badge/Prisma-8.0_RC-2D3748?logo=prisma)](https://www.prisma.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-4169E1?logo=postgresql)](https://www.postgresql.org/)
-[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC?logo=tailwindcss)](https://tailwindcss.com/)
 [![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.13-FF6600?logo=rabbitmq)](https://www.rabbitmq.com/)
 [![Docker](https://img.shields.io/badge/Docker-24+-2496ED?logo=docker)](https://www.docker.com/)
 [![pnpm](https://img.shields.io/badge/pnpm-10+-F69220?logo=pnpm)](https://pnpm.io/)
@@ -30,7 +29,7 @@ The repository is structured as a **pnpm monorepo** containing both the NestJS o
 
 | Layer | Technologies |
 | :--- | :--- |
-| **Backend (`apps/api`)** | [NestJS 11](https://nestjs.com/), TypeScript, [Prisma ORM](https://www.prisma.io/), `class-validator`, `class-transformer` |
+| **Backend (`apps/api`)** | [NestJS 11](https://nestjs.com/), TypeScript 5.7, [Prisma ORM 8](https://www.prisma.io/) (RC, `orm-postgres` driver), `class-validator`, `class-transformer` |
 | **Frontend (`apps/web`)** | [React 19](https://react.dev/), [Vite](https://vitejs.dev/), TypeScript |
 | **Message Broker** | [RabbitMQ 3.13](https://www.rabbitmq.com/) (`amqp-connection-manager`, `amqplib`) |
 | **Database** | [PostgreSQL 16](https://www.postgresql.org/) |
@@ -133,6 +132,9 @@ The engine coordinates bookings via stateful stages:
 2. **Step Execution**: Generates sequential and parallel steps (`BookingStep`) routed to target agents via RabbitMQ.
 3. **Status Transitions**: `pending` $\rightarrow$ `in_progress` $\rightarrow$ `success` / `failed`.
 4. **Compensation**: In case of failures or partial allotments, triggers compensating transactions (`compensating` $\rightarrow$ `compensated`).
+
+> [!NOTE]
+> **Out of scope — Transfer/settle**: Supplier settlement (paying the hotel its cut and the airline its cut) is explicitly out of scope for this project. In the real world it runs on a completely different timeline and system — batch settlement runs, supplier payouts on net-30 terms, commission deductions, currency conversion, etc. That is a separate financial/accounting concern, not part of the synchronous booking orchestration flow.
 
 ---
 
