@@ -1,10 +1,16 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
+import { AppModule } from '@/app.module';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
+import { AllExceptionsFilter } from '@/common/filters/all-exceptions.filter';
+import { ResponseInterceptor } from '@/common/interceptors/response.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  // Docs-aligned logger backend: buffered startup logs + JSON output for
+  // framework logs and every `new Logger(...)` (interceptors, filter).
+  app.useLogger(new ConsoleLogger({ json: true }));
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
@@ -27,6 +33,11 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  // Global cross-cutting concerns: structured errors + response envelope
+  app.useGlobalFilters(new AllExceptionsFilter());
+  const reflector = app.get(Reflector);
+  app.useGlobalInterceptors(new ResponseInterceptor(reflector));
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
