@@ -1,1 +1,1 @@
-export * from './create-booking.dto';
+export * from '@/dto/create-booking.dto';
