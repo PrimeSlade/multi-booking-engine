@@ -63,3 +63,4 @@ pnpm run prisma:migrate
 2. **Modular Architecture**: Separate concerns cleanly between Controllers, Services, and Modules.
 3. **Error Handling**: Use NestJS built-in HTTP exceptions and structured error responses.
 4. **Resilience**: Ensure RabbitMQ step messages and DB transactions handle idempotent retries and compensations gracefully.
+5. **Encapsulation (OO)**: Helpers used by only one class must be `private` methods of that class, not module-scope free functions. Promote to shared/exported utilities only when a second consumer needs them.
