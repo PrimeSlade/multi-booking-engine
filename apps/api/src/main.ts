@@ -5,25 +5,35 @@ import { AppModule } from '@/app.module';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import { AllExceptionsFilter } from '@/common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from '@/common/interceptors/response.interceptor';
+import { EXCHANGES, QUEUES } from '@/messaging/messaging.constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   const configService = app.get(ConfigService);
+  const rmqUrl = configService.get<string>(
+    'RABBITMQ_URL',
+    'amqp://localhost:5672',
+  );
 
+  // Orchestrator Step Completed Queue (with DLQ configured)
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: [
-        configService.get<string>('RABBITMQ_URL', 'amqp://localhost:5672'),
-      ],
-      queue: 'booking.step.completed',
-      exchange: 'booking.topic',
+      urls: [rmqUrl],
+      queue: QUEUES.COMPLETED,
+      exchange: configService.get<string>(
+        'RABBITMQ_EXCHANGE',
+        EXCHANGES.BOOKING_TOPIC,
+      ),
       exchangeType: 'topic',
       wildcards: true,
       noAck: false, // enables manual acknowledgment
       queueOptions: {
         durable: true,
+        arguments: {
+          'x-dead-letter-exchange': EXCHANGES.BOOKING_DLX,
+        },
       },
     },
   });
