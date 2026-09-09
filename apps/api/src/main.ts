@@ -1,4 +1,5 @@
-import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from '@/app.module';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
@@ -8,13 +9,21 @@ import { ResponseInterceptor } from '@/common/interceptors/response.interceptor'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
+  const configService = app.get(ConfigService);
+
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: ['amqp://localhost:5672'],
-      queue: 'cats_queue',
+      urls: [
+        configService.get<string>('RABBITMQ_URL', 'amqp://localhost:5672'),
+      ],
+      queue: 'booking.step.completed',
+      exchange: 'booking.topic',
+      exchangeType: 'topic',
+      wildcards: true,
+      noAck: false, // enables manual acknowledgment
       queueOptions: {
-        durable: false,
+        durable: true,
       },
     },
   });
@@ -35,7 +44,7 @@ async function bootstrap() {
   const reflector = app.get(Reflector);
   app.useGlobalInterceptors(new ResponseInterceptor(reflector));
 
-  const port = process.env.PORT ?? 3000;
+  const port = configService.get<number>('PORT', 3000);
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
 }

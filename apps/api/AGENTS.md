@@ -64,3 +64,10 @@ pnpm run prisma:migrate
 3. **Error Handling**: Use NestJS built-in HTTP exceptions and structured error responses.
 4. **Resilience**: Ensure RabbitMQ step messages and DB transactions handle idempotent retries and compensations gracefully.
 5. **Encapsulation (OO)**: Helpers used by only one class must be `private` methods of that class, not module-scope free functions. Promote to shared/exported utilities only when a second consumer needs them.
+
+---
+
+## Agent Skills
+
+- **NestJS**: When writing, reviewing, or refactoring backend code, follow [.agents/skills/nestjs-best-practices/SKILL.md](file:///Users/saizayarhein/Desktop/mutli-booking-engine/.agents/skills/nestjs-best-practices/SKILL.md) (40 rules in `rules/`, prioritized by impact).
+- **RabbitMQ**: When touching messaging (exchanges, queues, workers, retries), follow [.agents/skills/rabbitmq-development/SKILL.md](file:///Users/saizayarhein/Desktop/mutli-booking-engine/.agents/skills/rabbitmq-development/SKILL.md).
