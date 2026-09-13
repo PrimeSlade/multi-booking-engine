@@ -12,6 +12,7 @@
     "lint": "pnpm -r lint",
     "format": "prettier --write \"apps/**/*.{ts,tsx,js,jsx,json,md}\"",
     "test": "pnpm --filter @booking/api test",
+    "seed": "pnpm --filter @booking/api seed",
     "prepare": "husky"
   },
   "devDependencies": {
