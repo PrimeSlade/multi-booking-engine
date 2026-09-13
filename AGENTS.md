@@ -65,3 +65,8 @@ docker-compose down
   - `feat(infra):` for Docker / environment changes
   - `chore(monorepo):` or `docs:` for root / documentation updates
 - **Pre-commit Hooks**: Husky runs `lint-staged` on staged files before each commit.
+
+---
+
+## TypeScript Standards
+- **Prefer `type` over `interface`**: Consistently use `type` aliases rather than `interface` for object models, schema types, and data structures across both applications (`apps/api` and `apps/web`).
