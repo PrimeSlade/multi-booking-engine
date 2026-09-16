@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'20d08b762e23a247a5236607c810261051fe8a97a9eb1e74b07e5a76eccd5bc3'>;
+  StorageHashBase<'f46c2397fd0d37435f79691913e0a2c03831846da302136ce45841968a474660'>;
 export type ExecutionHash =
   ExecutionHashBase<'efbc1e60f192c8645e4a372146a84c7f56e02402c3446adae30e1f940443f322'>;
 export type ProfileHash =
@@ -762,8 +762,8 @@ export type StorageColumnTypes = {
       readonly booking_id: CodecTypes['pg/text@1']['output'];
       readonly departure_date: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly destination: CodecTypes['pg/text@1']['output'];
-      readonly flight_id: CodecTypes['pg/text@1']['output'];
       readonly flight_number: CodecTypes['pg/text@1']['output'] | null;
+      readonly flightId: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly origin: CodecTypes['pg/text@1']['output'];
       readonly passengers: CodecTypes['pg/int4@1']['output'];
@@ -778,8 +778,8 @@ export type StorageColumnTypes = {
       readonly check_in: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly check_out: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly city: CodecTypes['pg/text@1']['output'];
-      readonly hotel_id: CodecTypes['pg/text@1']['output'];
       readonly hotel_name: CodecTypes['pg/text@1']['output'] | null;
+      readonly hotelId: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly room_id: CodecTypes['pg/text@1']['output'] | null;
       readonly room_type: CodecTypes['pg/text@1']['output'] | null;
@@ -851,8 +851,8 @@ export type StorageColumnInputTypes = {
       readonly booking_id: CodecTypes['pg/text@1']['input'];
       readonly departure_date: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly destination: CodecTypes['pg/text@1']['input'];
-      readonly flight_id: CodecTypes['pg/text@1']['input'];
       readonly flight_number: CodecTypes['pg/text@1']['input'] | null;
+      readonly flightId: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly origin: CodecTypes['pg/text@1']['input'];
       readonly passengers: CodecTypes['pg/int4@1']['input'];
@@ -867,8 +867,8 @@ export type StorageColumnInputTypes = {
       readonly check_in: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly check_out: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly city: CodecTypes['pg/text@1']['input'];
-      readonly hotel_id: CodecTypes['pg/text@1']['input'];
       readonly hotel_name: CodecTypes['pg/text@1']['input'] | null;
+      readonly hotelId: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly room_id: CodecTypes['pg/text@1']['input'] | null;
       readonly room_type: CodecTypes['pg/text@1']['input'] | null;
@@ -1207,7 +1207,7 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
-                readonly flight_id: {
+                readonly flightId: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
@@ -1302,7 +1302,7 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
-                readonly hotel_id: {
+                readonly hotelId: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
@@ -1983,7 +1983,7 @@ type ContractBase = Omit<
               readonly fields: {
                 readonly id: { readonly column: 'id' };
                 readonly bookingId: { readonly column: 'booking_id' };
-                readonly flightId: { readonly column: 'flight_id' };
+                readonly flightId: { readonly column: 'flightId' };
                 readonly flightNumber: { readonly column: 'flight_number' };
                 readonly origin: { readonly column: 'origin' };
                 readonly destination: { readonly column: 'destination' };
@@ -2142,7 +2142,7 @@ type ContractBase = Omit<
               readonly fields: {
                 readonly id: { readonly column: 'id' };
                 readonly bookingId: { readonly column: 'booking_id' };
-                readonly hotelId: { readonly column: 'hotel_id' };
+                readonly hotelId: { readonly column: 'hotelId' };
                 readonly hotelName: { readonly column: 'hotel_name' };
                 readonly roomId: { readonly column: 'room_id' };
                 readonly roomType: { readonly column: 'room_type' };

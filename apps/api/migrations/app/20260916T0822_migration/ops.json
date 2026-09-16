@@ -1,0 +1,413 @@
+[
+  {
+    "id": "dropColumn.booking.products",
+    "label": "Drop column \"products\" from \"booking\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "products",
+        "table": "booking"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"products\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking",
+          "products"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"products\"",
+        "sql": "ALTER TABLE \"public\".\"booking\" DROP COLUMN \"products\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"products\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking",
+          "products"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropColumn.booking_step.product",
+    "label": "Drop column \"product\" from \"booking_step\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "product",
+        "table": "booking_step"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"product\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking_step",
+          "product"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"product\"",
+        "sql": "ALTER TABLE \"public\".\"booking_step\" DROP COLUMN \"product\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"product\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking_step",
+          "product"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropConstraint.booking_step.booking_step_booking_id_step_name_key",
+    "label": "Drop constraint \"booking_step_booking_id_step_name_key\" on \"booking_step\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "booking_step_booking_id_step_name_key",
+        "table": "booking_step"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"booking_step_booking_id_step_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_step_booking_id_step_name_key",
+          "public",
+          "\"public\".\"booking_step\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"booking_step_booking_id_step_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"booking_step\" DROP CONSTRAINT \"booking_step_booking_id_step_name_key\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"booking_step_booking_id_step_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_step_booking_id_step_name_key",
+          "public",
+          "\"public\".\"booking_step\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.booking_item",
+    "label": "Create table \"booking_item\"",
+    "summary": "Creates table \"booking_item\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "booking_item"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"booking_item\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_item\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"booking_item\"",
+        "sql": "CREATE TABLE \"public\".\"booking_item\" (\n  \"booking_id\" text NOT NULL,\n  \"check_in\" timestamptz,\n  \"check_out\" timestamptz,\n  \"city\" text,\n  \"departure_date\" timestamptz,\n  \"destination\" text,\n  \"flight_id\" text,\n  \"flight_number\" text,\n  \"hotel_id\" text,\n  \"hotel_name\" text,\n  \"id\" text NOT NULL,\n  \"origin\" text,\n  \"passengers\" int4,\n  \"room_id\" text,\n  \"room_type\" text,\n  \"rooms\" int4,\n  \"type\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"booking_item\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_item\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.booking_step.booking_item_id",
+    "label": "Add column \"booking_item_id\" to \"booking_step\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "booking_item_id",
+        "table": "booking_step"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"booking_item_id\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking_step",
+          "booking_item_id"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"booking_item_id\"",
+        "sql": "ALTER TABLE \"public\".\"booking_step\" ADD COLUMN \"booking_item_id\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"booking_item_id\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking_step",
+          "booking_item_id"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.booking_step.booking_step_booking_id_step_name_booking_item_id_key",
+    "label": "Add unique constraint on \"booking_step\" (booking_id, step_name, booking_item_id)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "booking_step_booking_id_step_name_booking_item_id_key",
+        "table": "booking_step"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"booking_step_booking_id_step_name_booking_item_id_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_step_booking_id_step_name_booking_item_id_key",
+          "public",
+          "\"public\".\"booking_step\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"booking_step_booking_id_step_name_booking_item_id_key\"",
+        "sql": "ALTER TABLE \"public\".\"booking_step\" ADD CONSTRAINT \"booking_step_booking_id_step_name_booking_item_id_key\" UNIQUE (\"booking_id\", \"step_name\", \"booking_item_id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"booking_step_booking_id_step_name_booking_item_id_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_step_booking_id_step_name_booking_item_id_key",
+          "public",
+          "\"public\".\"booking_step\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.booking_item.booking_item_booking_id_idx_aeea169b",
+    "label": "Create index \"booking_item_booking_id_idx_aeea169b\" on \"booking_item\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "booking_item_booking_id_idx_aeea169b",
+        "table": "booking_item"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"booking_item_booking_id_idx_aeea169b\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_item_booking_id_idx_aeea169b\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"booking_item_booking_id_idx_aeea169b\"",
+        "sql": "CREATE INDEX \"booking_item_booking_id_idx_aeea169b\" ON \"public\".\"booking_item\" (\"booking_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"booking_item_booking_id_idx_aeea169b\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_item_booking_id_idx_aeea169b\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.booking_step.booking_step_booking_item_id_idx_5072c4d1",
+    "label": "Create index \"booking_step_booking_item_id_idx_5072c4d1\" on \"booking_step\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "booking_step_booking_item_id_idx_5072c4d1",
+        "table": "booking_step"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"booking_step_booking_item_id_idx_5072c4d1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_step_booking_item_id_idx_5072c4d1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"booking_step_booking_item_id_idx_5072c4d1\"",
+        "sql": "CREATE INDEX \"booking_step_booking_item_id_idx_5072c4d1\" ON \"public\".\"booking_step\" (\"booking_item_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"booking_step_booking_item_id_idx_5072c4d1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"booking_step_booking_item_id_idx_5072c4d1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.booking_item.booking_item_booking_id_fkey",
+    "label": "Add foreign key \"booking_item_booking_id_fkey\" on \"booking_item\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "booking_item_booking_id_fkey",
+        "table": "booking_item"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"booking_item_booking_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_item_booking_id_fkey",
+          "public",
+          "\"public\".\"booking_item\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"booking_item_booking_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"booking_item\"\nADD CONSTRAINT \"booking_item_booking_id_fkey\"\nFOREIGN KEY (\"booking_id\")\nREFERENCES \"public\".\"booking\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"booking_item_booking_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_item_booking_id_fkey",
+          "public",
+          "\"public\".\"booking_item\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.booking_step.booking_step_booking_item_id_fkey",
+    "label": "Add foreign key \"booking_step_booking_item_id_fkey\" on \"booking_step\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "booking_step_booking_item_id_fkey",
+        "table": "booking_step"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"booking_step_booking_item_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_step_booking_item_id_fkey",
+          "public",
+          "\"public\".\"booking_step\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"booking_step_booking_item_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"booking_step\"\nADD CONSTRAINT \"booking_step_booking_item_id_fkey\"\nFOREIGN KEY (\"booking_item_id\")\nREFERENCES \"public\".\"booking_item\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"booking_step_booking_item_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_step_booking_item_id_fkey",
+          "public",
+          "\"public\".\"booking_step\""
+        ]
+      }
+    ]
+  }
+]

@@ -35,22 +35,48 @@ export type Hotel = {
 export type BookingStep = {
   id: string;
   bookingId: string;
+  flightBookingId: string | null;
+  hotelBookingId: string | null;
   stepIndex: number;
   stage: number;
   stepName: string;
   scope: string;
-  product: string | null;
   agent: string;
   status: string;
+};
+
+export type FlightBooking = {
+  id: string;
+  bookingId: string;
+  flightId: string;
+  flightNumber: string | null;
+  origin: string;
+  destination: string;
+  departureDate: string;
+  passengers: number;
+};
+
+export type HotelBooking = {
+  id: string;
+  bookingId: string;
+  hotelId: string;
+  hotelName: string | null;
+  roomId: string | null;
+  roomType: string | null;
+  city: string;
+  checkIn: string;
+  checkOut: string;
+  rooms: number;
 };
 
 export type Booking = {
   id: string;
   userId: string;
   status: string;
-  products: unknown;
   createdAt: string;
   updatedAt: string;
+  flightBookings: FlightBooking[];
+  hotelBookings: HotelBooking[];
   steps: BookingStep[];
 };
 
@@ -58,7 +84,6 @@ export type FlightProduct = {
   type: 'flight';
   flightId: string;
   flightNumber?: string;
-  airlineName?: string;
   origin: string;
   destination: string;
   departureDate: string;
@@ -74,7 +99,6 @@ export type HotelProduct = {
   city: string;
   checkIn: string;
   checkOut: string;
-  guests?: number;
   rooms?: number;
 };
 

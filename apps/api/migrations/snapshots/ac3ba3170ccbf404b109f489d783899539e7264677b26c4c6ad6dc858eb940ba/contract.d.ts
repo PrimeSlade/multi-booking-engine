@@ -33,9 +33,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'20d08b762e23a247a5236607c810261051fe8a97a9eb1e74b07e5a76eccd5bc3'>;
+  StorageHashBase<'ac3ba3170ccbf404b109f489d783899539e7264677b26c4c6ad6dc858eb940ba'>;
 export type ExecutionHash =
-  ExecutionHashBase<'efbc1e60f192c8645e4a372146a84c7f56e02402c3446adae30e1f940443f322'>;
+  ExecutionHashBase<'f8cdd41a5dacc6ba763e6f3bd10f80f99729d4f2528ad05dbdc92943795af848'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -547,11 +547,30 @@ export type FieldOutputTypes = {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
+    readonly BookingItem: {
+      readonly id: CodecTypes['pg/text@1']['output'];
+      readonly bookingId: CodecTypes['pg/text@1']['output'];
+      readonly type: CodecTypes['pg/text@1']['output'];
+      readonly flightId: CodecTypes['pg/text@1']['output'] | null;
+      readonly flightNumber: CodecTypes['pg/text@1']['output'] | null;
+      readonly origin: CodecTypes['pg/text@1']['output'] | null;
+      readonly destination: CodecTypes['pg/text@1']['output'] | null;
+      readonly departureDate:
+        CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly passengers: CodecTypes['pg/int4@1']['output'] | null;
+      readonly hotelId: CodecTypes['pg/text@1']['output'] | null;
+      readonly hotelName: CodecTypes['pg/text@1']['output'] | null;
+      readonly roomId: CodecTypes['pg/text@1']['output'] | null;
+      readonly roomType: CodecTypes['pg/text@1']['output'] | null;
+      readonly city: CodecTypes['pg/text@1']['output'] | null;
+      readonly checkIn: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly checkOut: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly rooms: CodecTypes['pg/int4@1']['output'] | null;
+    };
     readonly BookingStep: {
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly bookingId: CodecTypes['pg/text@1']['output'];
-      readonly flightBookingId: CodecTypes['pg/text@1']['output'] | null;
-      readonly hotelBookingId: CodecTypes['pg/text@1']['output'] | null;
+      readonly bookingItemId: CodecTypes['pg/text@1']['output'] | null;
       readonly stepIndex: CodecTypes['pg/int4@1']['output'];
       readonly stage: CodecTypes['pg/int4@1']['output'];
       readonly stepName: CodecTypes['pg/text@1']['output'];
@@ -580,32 +599,10 @@ export type FieldOutputTypes = {
       readonly price: CodecTypes['pg/numeric@1']['output'];
       readonly seatsLeft: CodecTypes['pg/int4@1']['output'];
     };
-    readonly FlightBooking: {
-      readonly id: CodecTypes['pg/text@1']['output'];
-      readonly bookingId: CodecTypes['pg/text@1']['output'];
-      readonly flightId: CodecTypes['pg/text@1']['output'];
-      readonly flightNumber: CodecTypes['pg/text@1']['output'] | null;
-      readonly origin: CodecTypes['pg/text@1']['output'];
-      readonly destination: CodecTypes['pg/text@1']['output'];
-      readonly departureDate: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly passengers: CodecTypes['pg/int4@1']['output'];
-    };
     readonly Hotel: {
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly city: CodecTypes['pg/text@1']['output'];
-    };
-    readonly HotelBooking: {
-      readonly id: CodecTypes['pg/text@1']['output'];
-      readonly bookingId: CodecTypes['pg/text@1']['output'];
-      readonly hotelId: CodecTypes['pg/text@1']['output'];
-      readonly hotelName: CodecTypes['pg/text@1']['output'] | null;
-      readonly roomId: CodecTypes['pg/text@1']['output'] | null;
-      readonly roomType: CodecTypes['pg/text@1']['output'] | null;
-      readonly city: CodecTypes['pg/text@1']['output'];
-      readonly checkIn: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly checkOut: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly rooms: CodecTypes['pg/int4@1']['output'];
     };
     readonly Room: {
       readonly id: CodecTypes['pg/text@1']['output'];
@@ -636,11 +633,30 @@ export type FieldInputTypes = {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
+    readonly BookingItem: {
+      readonly id: CodecTypes['pg/text@1']['input'];
+      readonly bookingId: CodecTypes['pg/text@1']['input'];
+      readonly type: CodecTypes['pg/text@1']['input'];
+      readonly flightId: CodecTypes['pg/text@1']['input'] | null;
+      readonly flightNumber: CodecTypes['pg/text@1']['input'] | null;
+      readonly origin: CodecTypes['pg/text@1']['input'] | null;
+      readonly destination: CodecTypes['pg/text@1']['input'] | null;
+      readonly departureDate:
+        CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly passengers: CodecTypes['pg/int4@1']['input'] | null;
+      readonly hotelId: CodecTypes['pg/text@1']['input'] | null;
+      readonly hotelName: CodecTypes['pg/text@1']['input'] | null;
+      readonly roomId: CodecTypes['pg/text@1']['input'] | null;
+      readonly roomType: CodecTypes['pg/text@1']['input'] | null;
+      readonly city: CodecTypes['pg/text@1']['input'] | null;
+      readonly checkIn: CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly checkOut: CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly rooms: CodecTypes['pg/int4@1']['input'] | null;
+    };
     readonly BookingStep: {
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly bookingId: CodecTypes['pg/text@1']['input'];
-      readonly flightBookingId: CodecTypes['pg/text@1']['input'] | null;
-      readonly hotelBookingId: CodecTypes['pg/text@1']['input'] | null;
+      readonly bookingItemId: CodecTypes['pg/text@1']['input'] | null;
       readonly stepIndex: CodecTypes['pg/int4@1']['input'];
       readonly stage: CodecTypes['pg/int4@1']['input'];
       readonly stepName: CodecTypes['pg/text@1']['input'];
@@ -669,32 +685,10 @@ export type FieldInputTypes = {
       readonly price: CodecTypes['pg/numeric@1']['input'];
       readonly seatsLeft: CodecTypes['pg/int4@1']['input'];
     };
-    readonly FlightBooking: {
-      readonly id: CodecTypes['pg/text@1']['input'];
-      readonly bookingId: CodecTypes['pg/text@1']['input'];
-      readonly flightId: CodecTypes['pg/text@1']['input'];
-      readonly flightNumber: CodecTypes['pg/text@1']['input'] | null;
-      readonly origin: CodecTypes['pg/text@1']['input'];
-      readonly destination: CodecTypes['pg/text@1']['input'];
-      readonly departureDate: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly passengers: CodecTypes['pg/int4@1']['input'];
-    };
     readonly Hotel: {
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly city: CodecTypes['pg/text@1']['input'];
-    };
-    readonly HotelBooking: {
-      readonly id: CodecTypes['pg/text@1']['input'];
-      readonly bookingId: CodecTypes['pg/text@1']['input'];
-      readonly hotelId: CodecTypes['pg/text@1']['input'];
-      readonly hotelName: CodecTypes['pg/text@1']['input'] | null;
-      readonly roomId: CodecTypes['pg/text@1']['input'] | null;
-      readonly roomType: CodecTypes['pg/text@1']['input'] | null;
-      readonly city: CodecTypes['pg/text@1']['input'];
-      readonly checkIn: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly checkOut: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly rooms: CodecTypes['pg/int4@1']['input'];
     };
     readonly Room: {
       readonly id: CodecTypes['pg/text@1']['input'];
@@ -725,13 +719,33 @@ export type StorageColumnTypes = {
       readonly updated_at: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly user_id: CodecTypes['pg/text@1']['output'];
     };
+    readonly booking_item: {
+      readonly booking_id: CodecTypes['pg/text@1']['output'];
+      readonly check_in: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly check_out:
+        CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly city: CodecTypes['pg/text@1']['output'] | null;
+      readonly departure_date:
+        CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly destination: CodecTypes['pg/text@1']['output'] | null;
+      readonly flight_id: CodecTypes['pg/text@1']['output'] | null;
+      readonly flight_number: CodecTypes['pg/text@1']['output'] | null;
+      readonly hotel_id: CodecTypes['pg/text@1']['output'] | null;
+      readonly hotel_name: CodecTypes['pg/text@1']['output'] | null;
+      readonly id: CodecTypes['pg/text@1']['output'];
+      readonly origin: CodecTypes['pg/text@1']['output'] | null;
+      readonly passengers: CodecTypes['pg/int4@1']['output'] | null;
+      readonly room_id: CodecTypes['pg/text@1']['output'] | null;
+      readonly room_type: CodecTypes['pg/text@1']['output'] | null;
+      readonly rooms: CodecTypes['pg/int4@1']['output'] | null;
+      readonly type: CodecTypes['pg/text@1']['output'];
+    };
     readonly booking_step: {
       readonly agent: CodecTypes['pg/text@1']['output'];
       readonly attempt: CodecTypes['pg/int4@1']['output'];
       readonly booking_id: CodecTypes['pg/text@1']['output'];
+      readonly booking_item_id: CodecTypes['pg/text@1']['output'] | null;
       readonly error: CodecTypes['pg/json@1']['output'] | null;
-      readonly flight_booking_id: CodecTypes['pg/text@1']['output'] | null;
-      readonly hotel_booking_id: CodecTypes['pg/text@1']['output'] | null;
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly result: CodecTypes['pg/json@1']['output'] | null;
       readonly retryable: CodecTypes['pg/bool@1']['output'] | null;
@@ -758,32 +772,10 @@ export type StorageColumnTypes = {
       readonly price: CodecTypes['pg/numeric@1']['output'];
       readonly seats_left: CodecTypes['pg/int4@1']['output'];
     };
-    readonly flight_booking: {
-      readonly booking_id: CodecTypes['pg/text@1']['output'];
-      readonly departure_date: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly destination: CodecTypes['pg/text@1']['output'];
-      readonly flight_id: CodecTypes['pg/text@1']['output'];
-      readonly flight_number: CodecTypes['pg/text@1']['output'] | null;
-      readonly id: CodecTypes['pg/text@1']['output'];
-      readonly origin: CodecTypes['pg/text@1']['output'];
-      readonly passengers: CodecTypes['pg/int4@1']['output'];
-    };
     readonly hotel: {
       readonly city: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
-    };
-    readonly hotel_booking: {
-      readonly booking_id: CodecTypes['pg/text@1']['output'];
-      readonly check_in: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly check_out: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly city: CodecTypes['pg/text@1']['output'];
-      readonly hotel_id: CodecTypes['pg/text@1']['output'];
-      readonly hotel_name: CodecTypes['pg/text@1']['output'] | null;
-      readonly id: CodecTypes['pg/text@1']['output'];
-      readonly room_id: CodecTypes['pg/text@1']['output'] | null;
-      readonly room_type: CodecTypes['pg/text@1']['output'] | null;
-      readonly rooms: CodecTypes['pg/int4@1']['output'];
     };
     readonly room: {
       readonly available: CodecTypes['pg/bool@1']['output'];
@@ -814,13 +806,32 @@ export type StorageColumnInputTypes = {
       readonly updated_at: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly user_id: CodecTypes['pg/text@1']['input'];
     };
+    readonly booking_item: {
+      readonly booking_id: CodecTypes['pg/text@1']['input'];
+      readonly check_in: CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly check_out: CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly city: CodecTypes['pg/text@1']['input'] | null;
+      readonly departure_date:
+        CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly destination: CodecTypes['pg/text@1']['input'] | null;
+      readonly flight_id: CodecTypes['pg/text@1']['input'] | null;
+      readonly flight_number: CodecTypes['pg/text@1']['input'] | null;
+      readonly hotel_id: CodecTypes['pg/text@1']['input'] | null;
+      readonly hotel_name: CodecTypes['pg/text@1']['input'] | null;
+      readonly id: CodecTypes['pg/text@1']['input'];
+      readonly origin: CodecTypes['pg/text@1']['input'] | null;
+      readonly passengers: CodecTypes['pg/int4@1']['input'] | null;
+      readonly room_id: CodecTypes['pg/text@1']['input'] | null;
+      readonly room_type: CodecTypes['pg/text@1']['input'] | null;
+      readonly rooms: CodecTypes['pg/int4@1']['input'] | null;
+      readonly type: CodecTypes['pg/text@1']['input'];
+    };
     readonly booking_step: {
       readonly agent: CodecTypes['pg/text@1']['input'];
       readonly attempt: CodecTypes['pg/int4@1']['input'];
       readonly booking_id: CodecTypes['pg/text@1']['input'];
+      readonly booking_item_id: CodecTypes['pg/text@1']['input'] | null;
       readonly error: CodecTypes['pg/json@1']['input'] | null;
-      readonly flight_booking_id: CodecTypes['pg/text@1']['input'] | null;
-      readonly hotel_booking_id: CodecTypes['pg/text@1']['input'] | null;
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly result: CodecTypes['pg/json@1']['input'] | null;
       readonly retryable: CodecTypes['pg/bool@1']['input'] | null;
@@ -847,32 +858,10 @@ export type StorageColumnInputTypes = {
       readonly price: CodecTypes['pg/numeric@1']['input'];
       readonly seats_left: CodecTypes['pg/int4@1']['input'];
     };
-    readonly flight_booking: {
-      readonly booking_id: CodecTypes['pg/text@1']['input'];
-      readonly departure_date: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly destination: CodecTypes['pg/text@1']['input'];
-      readonly flight_id: CodecTypes['pg/text@1']['input'];
-      readonly flight_number: CodecTypes['pg/text@1']['input'] | null;
-      readonly id: CodecTypes['pg/text@1']['input'];
-      readonly origin: CodecTypes['pg/text@1']['input'];
-      readonly passengers: CodecTypes['pg/int4@1']['input'];
-    };
     readonly hotel: {
       readonly city: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
-    };
-    readonly hotel_booking: {
-      readonly booking_id: CodecTypes['pg/text@1']['input'];
-      readonly check_in: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly check_out: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly city: CodecTypes['pg/text@1']['input'];
-      readonly hotel_id: CodecTypes['pg/text@1']['input'];
-      readonly hotel_name: CodecTypes['pg/text@1']['input'] | null;
-      readonly id: CodecTypes['pg/text@1']['input'];
-      readonly room_id: CodecTypes['pg/text@1']['input'] | null;
-      readonly room_type: CodecTypes['pg/text@1']['input'] | null;
-      readonly rooms: CodecTypes['pg/int4@1']['input'];
     };
     readonly room: {
       readonly available: CodecTypes['pg/bool@1']['input'];
@@ -968,6 +957,119 @@ type ContractBase = Omit<
               indexes: readonly [];
               foreignKeys: readonly [];
             };
+            readonly booking_item: {
+              columns: {
+                readonly id: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly booking_id: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly type: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly flight_id: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly flight_number: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly origin: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly destination: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly departure_date: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: true;
+                };
+                readonly passengers: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
+                readonly hotel_id: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly hotel_name: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly room_id: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly room_type: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly city: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly check_in: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: true;
+                };
+                readonly check_out: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: true;
+                };
+                readonly rooms: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'booking_item_booking_id_idx_aeea169b';
+                  readonly prefix: 'booking_item_booking_id_idx';
+                  readonly columns: readonly ['booking_id'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'booking_item';
+                    readonly columns: readonly ['booking_id'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'booking';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
             readonly booking_step: {
               columns: {
                 readonly id: {
@@ -980,12 +1082,7 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
-                readonly flight_booking_id: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
-                };
-                readonly hotel_booking_id: {
+                readonly booking_item_id: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: true;
@@ -1055,7 +1152,15 @@ type ContractBase = Omit<
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [];
+              uniques: readonly [
+                {
+                  readonly columns: readonly [
+                    'booking_id',
+                    'step_name',
+                    'booking_item_id',
+                  ];
+                },
+              ];
               indexes: readonly [
                 {
                   readonly name: 'booking_step_booking_id_idx_aeea169b';
@@ -1064,15 +1169,9 @@ type ContractBase = Omit<
                   readonly unique: false;
                 },
                 {
-                  readonly name: 'booking_step_flight_booking_id_idx_3c0ff35c';
-                  readonly prefix: 'booking_step_flight_booking_id_idx';
-                  readonly columns: readonly ['flight_booking_id'];
-                  readonly unique: false;
-                },
-                {
-                  readonly name: 'booking_step_hotel_booking_id_idx_57ba87aa';
-                  readonly prefix: 'booking_step_hotel_booking_id_idx';
-                  readonly columns: readonly ['hotel_booking_id'];
+                  readonly name: 'booking_step_booking_item_id_idx_5072c4d1';
+                  readonly prefix: 'booking_step_booking_item_id_idx';
+                  readonly columns: readonly ['booking_item_id'];
                   readonly unique: false;
                 },
                 {
@@ -1105,23 +1204,11 @@ type ContractBase = Omit<
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'booking_step';
-                    readonly columns: readonly ['flight_booking_id'];
+                    readonly columns: readonly ['booking_item_id'];
                   };
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'flight_booking';
-                    readonly columns: readonly ['id'];
-                  };
-                },
-                {
-                  readonly source: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'booking_step';
-                    readonly columns: readonly ['hotel_booking_id'];
-                  };
-                  readonly target: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'hotel_booking';
+                    readonly tableName: 'booking_item';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -1195,78 +1282,6 @@ type ContractBase = Omit<
                 },
               ];
             };
-            readonly flight_booking: {
-              columns: {
-                readonly id: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly booking_id: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly flight_id: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly flight_number: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
-                };
-                readonly origin: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly destination: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly departure_date: {
-                  readonly nativeType: 'timestamptz';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                  readonly nullable: false;
-                };
-                readonly passengers: {
-                  readonly nativeType: 'int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/int4@1', 1>;
-                  };
-                };
-              };
-              primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [];
-              indexes: readonly [
-                {
-                  readonly name: 'flight_booking_booking_id_idx_aeea169b';
-                  readonly prefix: 'flight_booking_booking_id_idx';
-                  readonly columns: readonly ['booking_id'];
-                  readonly unique: false;
-                },
-              ];
-              foreignKeys: readonly [
-                {
-                  readonly source: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'flight_booking';
-                    readonly columns: readonly ['booking_id'];
-                  };
-                  readonly target: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'booking';
-                    readonly columns: readonly ['id'];
-                  };
-                },
-              ];
-            };
             readonly hotel: {
               columns: {
                 readonly id: {
@@ -1289,88 +1304,6 @@ type ContractBase = Omit<
               uniques: readonly [];
               indexes: readonly [];
               foreignKeys: readonly [];
-            };
-            readonly hotel_booking: {
-              columns: {
-                readonly id: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly booking_id: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly hotel_id: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly hotel_name: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
-                };
-                readonly room_id: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
-                };
-                readonly room_type: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
-                };
-                readonly city: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly check_in: {
-                  readonly nativeType: 'timestamptz';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                  readonly nullable: false;
-                };
-                readonly check_out: {
-                  readonly nativeType: 'timestamptz';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                  readonly nullable: false;
-                };
-                readonly rooms: {
-                  readonly nativeType: 'int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/int4@1', 1>;
-                  };
-                };
-              };
-              primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [];
-              indexes: readonly [
-                {
-                  readonly name: 'hotel_booking_booking_id_idx_aeea169b';
-                  readonly prefix: 'hotel_booking_booking_id_idx';
-                  readonly columns: readonly ['booking_id'];
-                  readonly unique: false;
-                },
-              ];
-              foreignKeys: readonly [
-                {
-                  readonly source: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'hotel_booking';
-                    readonly columns: readonly ['booking_id'];
-                  };
-                  readonly target: {
-                    readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'booking';
-                    readonly columns: readonly ['id'];
-                  };
-                },
-              ];
             };
             readonly room: {
               columns: {
@@ -1471,13 +1404,9 @@ type ContractBase = Omit<
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'Booking';
     };
-    readonly flight_booking: {
+    readonly booking_item: {
       readonly namespace: 'public' & NamespaceId;
-      readonly model: 'FlightBooking';
-    };
-    readonly hotel_booking: {
-      readonly namespace: 'public' & NamespaceId;
-      readonly model: 'HotelBooking';
+      readonly model: 'BookingItem';
     };
     readonly booking_step: {
       readonly namespace: 'public' & NamespaceId;
@@ -1589,21 +1518,10 @@ type ContractBase = Omit<
               };
             };
             readonly relations: {
-              readonly flightBookings: {
+              readonly items: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'FlightBooking';
-                };
-                readonly cardinality: '1:N';
-                readonly on: {
-                  readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['bookingId'];
-                };
-              };
-              readonly hotelBookings: {
-                readonly to: {
-                  readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'HotelBooking';
+                  readonly model: 'BookingItem';
                 };
                 readonly cardinality: '1:N';
                 readonly on: {
@@ -1638,6 +1556,176 @@ type ContractBase = Omit<
               };
             };
           };
+          readonly BookingItem: {
+            readonly fields: {
+              readonly id: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/text@1';
+                };
+              };
+              readonly bookingId: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/text@1';
+                };
+              };
+              readonly type: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/text@1';
+                };
+              };
+              readonly flightId: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/text@1';
+                };
+              };
+              readonly flightNumber: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/text@1';
+                };
+              };
+              readonly origin: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/text@1';
+                };
+              };
+              readonly destination: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/text@1';
+                };
+              };
+              readonly departureDate: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+              readonly passengers: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/int4@1';
+                };
+              };
+              readonly hotelId: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/text@1';
+                };
+              };
+              readonly hotelName: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/text@1';
+                };
+              };
+              readonly roomId: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/text@1';
+                };
+              };
+              readonly roomType: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/text@1';
+                };
+              };
+              readonly city: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/text@1';
+                };
+              };
+              readonly checkIn: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+              readonly checkOut: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+              readonly rooms: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/int4@1';
+                };
+              };
+            };
+            readonly relations: {
+              readonly booking: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Booking';
+                };
+                readonly cardinality: 'N:1';
+                readonly on: {
+                  readonly localFields: readonly ['bookingId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly steps: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'BookingStep';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['bookingItemId'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'booking_item';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly id: { readonly column: 'id' };
+                readonly bookingId: { readonly column: 'booking_id' };
+                readonly type: { readonly column: 'type' };
+                readonly flightId: { readonly column: 'flight_id' };
+                readonly flightNumber: { readonly column: 'flight_number' };
+                readonly origin: { readonly column: 'origin' };
+                readonly destination: { readonly column: 'destination' };
+                readonly departureDate: { readonly column: 'departure_date' };
+                readonly passengers: { readonly column: 'passengers' };
+                readonly hotelId: { readonly column: 'hotel_id' };
+                readonly hotelName: { readonly column: 'hotel_name' };
+                readonly roomId: { readonly column: 'room_id' };
+                readonly roomType: { readonly column: 'room_type' };
+                readonly city: { readonly column: 'city' };
+                readonly checkIn: { readonly column: 'check_in' };
+                readonly checkOut: { readonly column: 'check_out' };
+                readonly rooms: { readonly column: 'rooms' };
+              };
+            };
+          };
           readonly BookingStep: {
             readonly fields: {
               readonly id: {
@@ -1654,14 +1742,7 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/text@1';
                 };
               };
-              readonly flightBookingId: {
-                readonly nullable: true;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly hotelBookingId: {
+              readonly bookingItemId: {
                 readonly nullable: true;
                 readonly type: {
                   readonly kind: 'scalar';
@@ -1758,25 +1839,14 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['id'];
                 };
               };
-              readonly flightBooking: {
+              readonly bookingItem: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'FlightBooking';
+                  readonly model: 'BookingItem';
                 };
                 readonly cardinality: 'N:1';
                 readonly on: {
-                  readonly localFields: readonly ['flightBookingId'];
-                  readonly targetFields: readonly ['id'];
-                };
-              };
-              readonly hotelBooking: {
-                readonly to: {
-                  readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'HotelBooking';
-                };
-                readonly cardinality: 'N:1';
-                readonly on: {
-                  readonly localFields: readonly ['hotelBookingId'];
+                  readonly localFields: readonly ['bookingItemId'];
                   readonly targetFields: readonly ['id'];
                 };
               };
@@ -1787,12 +1857,7 @@ type ContractBase = Omit<
               readonly fields: {
                 readonly id: { readonly column: 'id' };
                 readonly bookingId: { readonly column: 'booking_id' };
-                readonly flightBookingId: {
-                  readonly column: 'flight_booking_id';
-                };
-                readonly hotelBookingId: {
-                  readonly column: 'hotel_booking_id';
-                };
+                readonly bookingItemId: { readonly column: 'booking_item_id' };
                 readonly stepIndex: { readonly column: 'step_index' };
                 readonly stage: { readonly column: 'stage' };
                 readonly stepName: { readonly column: 'step_name' };
@@ -1894,104 +1959,6 @@ type ContractBase = Omit<
               };
             };
           };
-          readonly FlightBooking: {
-            readonly fields: {
-              readonly id: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly bookingId: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly flightId: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly flightNumber: {
-                readonly nullable: true;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly origin: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly destination: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly departureDate: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                };
-              };
-              readonly passengers: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/int4@1';
-                };
-              };
-            };
-            readonly relations: {
-              readonly booking: {
-                readonly to: {
-                  readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'Booking';
-                };
-                readonly cardinality: 'N:1';
-                readonly on: {
-                  readonly localFields: readonly ['bookingId'];
-                  readonly targetFields: readonly ['id'];
-                };
-              };
-              readonly steps: {
-                readonly to: {
-                  readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'BookingStep';
-                };
-                readonly cardinality: '1:N';
-                readonly on: {
-                  readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['flightBookingId'];
-                };
-              };
-            };
-            readonly storage: {
-              readonly table: 'flight_booking';
-              readonly namespaceId: 'public';
-              readonly fields: {
-                readonly id: { readonly column: 'id' };
-                readonly bookingId: { readonly column: 'booking_id' };
-                readonly flightId: { readonly column: 'flight_id' };
-                readonly flightNumber: { readonly column: 'flight_number' };
-                readonly origin: { readonly column: 'origin' };
-                readonly destination: { readonly column: 'destination' };
-                readonly departureDate: { readonly column: 'departure_date' };
-                readonly passengers: { readonly column: 'passengers' };
-              };
-            };
-          };
           readonly Hotel: {
             readonly fields: {
               readonly id: {
@@ -2036,120 +2003,6 @@ type ContractBase = Omit<
                 readonly id: { readonly column: 'id' };
                 readonly name: { readonly column: 'name' };
                 readonly city: { readonly column: 'city' };
-              };
-            };
-          };
-          readonly HotelBooking: {
-            readonly fields: {
-              readonly id: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly bookingId: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly hotelId: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly hotelName: {
-                readonly nullable: true;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly roomId: {
-                readonly nullable: true;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly roomType: {
-                readonly nullable: true;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly city: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly checkIn: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                };
-              };
-              readonly checkOut: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                };
-              };
-              readonly rooms: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/int4@1';
-                };
-              };
-            };
-            readonly relations: {
-              readonly booking: {
-                readonly to: {
-                  readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'Booking';
-                };
-                readonly cardinality: 'N:1';
-                readonly on: {
-                  readonly localFields: readonly ['bookingId'];
-                  readonly targetFields: readonly ['id'];
-                };
-              };
-              readonly steps: {
-                readonly to: {
-                  readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'BookingStep';
-                };
-                readonly cardinality: '1:N';
-                readonly on: {
-                  readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['hotelBookingId'];
-                };
-              };
-            };
-            readonly storage: {
-              readonly table: 'hotel_booking';
-              readonly namespaceId: 'public';
-              readonly fields: {
-                readonly id: { readonly column: 'id' };
-                readonly bookingId: { readonly column: 'booking_id' };
-                readonly hotelId: { readonly column: 'hotel_id' };
-                readonly hotelName: { readonly column: 'hotel_name' };
-                readonly roomId: { readonly column: 'room_id' };
-                readonly roomType: { readonly column: 'room_type' };
-                readonly city: { readonly column: 'city' };
-                readonly checkIn: { readonly column: 'check_in' };
-                readonly checkOut: { readonly column: 'check_out' };
-                readonly rooms: { readonly column: 'rooms' };
               };
             };
           };
@@ -2308,6 +2161,17 @@ type ContractBase = Omit<
         {
           readonly ref: {
             readonly namespace: 'public';
+            readonly table: 'booking_item';
+            readonly column: 'id';
+          };
+          readonly onCreate: {
+            readonly kind: 'generator';
+            readonly id: 'uuidv4';
+          };
+        },
+        {
+          readonly ref: {
+            readonly namespace: 'public';
             readonly table: 'booking_step';
             readonly column: 'id';
           };
@@ -2329,28 +2193,6 @@ type ContractBase = Omit<
           readonly onUpdate: {
             readonly kind: 'generator';
             readonly id: 'timestampNow';
-          };
-        },
-        {
-          readonly ref: {
-            readonly namespace: 'public';
-            readonly table: 'flight_booking';
-            readonly column: 'id';
-          };
-          readonly onCreate: {
-            readonly kind: 'generator';
-            readonly id: 'uuidv4';
-          };
-        },
-        {
-          readonly ref: {
-            readonly namespace: 'public';
-            readonly table: 'hotel_booking';
-            readonly column: 'id';
-          };
-          readonly onCreate: {
-            readonly kind: 'generator';
-            readonly id: 'uuidv4';
           };
         },
       ];
