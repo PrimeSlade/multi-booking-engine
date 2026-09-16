@@ -45,16 +45,3 @@ export type StepConfig = z.infer<typeof StepConfigSchema>;
 export type ProductDefinition = z.infer<typeof ProductDefinitionSchema>;
 export type StageDefinition = z.infer<typeof StageDefinitionSchema>;
 export type RetryPolicy = z.infer<typeof RetryPolicySchema>;
-
-export type GeneratedStep = {
-  stepIndex: number;
-  stage: number;
-  stepName: string;
-  scope: 'product' | 'itinerary';
-  product: string | null;
-  agent: string;
-  routingKey: string;
-  timeoutMs: number;
-  retry: RetryPolicy;
-  compensate?: string;
-};

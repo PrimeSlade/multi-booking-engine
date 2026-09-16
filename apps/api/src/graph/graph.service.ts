@@ -2,12 +2,12 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BookingGraph, ProductDefinition, StepConfig } from './graph.schema';
 import {
-  GeneratedGraphDto,
-  GeneratedStageDto,
-  GeneratedStepDto,
-  GenerateGraphDto,
+  GeneratedGraph,
+  GeneratedStage,
+  GeneratedStep,
+  GenerateGraphInput,
   ProductItemInput,
-} from './dto';
+} from './types';
 
 @Injectable()
 export class GraphService {
@@ -16,54 +16,43 @@ export class GraphService {
   /**
    * Generates a staged booking execution graph based on the booking graph config template.
    */
-  generate(dto: GenerateGraphDto): GeneratedGraphDto {
+  generate(input: GenerateGraphInput): GeneratedGraph {
     const graph = this.configService.get<BookingGraph>('bookingGraph');
     if (!graph)
       throw new BadRequestException('Booking graph configuration not loaded');
 
-    const requestedProducts = this.extractProductTypes(dto.products);
+    const requestedProducts = this.extractProductTypes(input.products);
     this.validateProducts(requestedProducts, graph.products);
 
-    const generatedSteps: GeneratedStepDto[] = [];
-    const generatedStages: GeneratedStageDto[] = [];
-    let stepIndex = 0;
+    const steps: GeneratedStep[] = [];
+    const stages: GeneratedStage[] = [];
 
-    const stages = [...graph.itinerary.stages].sort(
+    const stageDefs = [...graph.itinerary.stages].sort(
       (a, b) => a.stage - b.stage,
     );
 
-    for (const stageDef of stages) {
-      const stageSteps: GeneratedStepDto[] = [];
+    for (const stageDef of stageDefs) {
+      const stageSteps = stageDef.steps
+        .filter((stepRef) =>
+          this.isStepIncluded(stepRef, requestedProducts, graph),
+        )
+        .map((stepRef) => this.buildStep(stepRef, stageDef.stage, graph));
 
-      for (const stepRef of stageDef.steps) {
-        if (this.shouldSkipStep(stepRef, requestedProducts, graph)) {
-          continue;
-        }
+      if (stageSteps.length === 0) continue;
 
-        const step = this.buildStep(
-          stepRef,
-          stageDef.stage,
-          stepIndex++,
-          graph,
-        );
-        stageSteps.push(step);
-        generatedSteps.push(step);
-      }
-
-      if (stageSteps.length > 0) {
-        generatedStages.push({
-          stage: stageDef.stage,
-          policy: stageDef.policy,
-          ...(stageDef.join ? { join: stageDef.join } : {}),
-          steps: stageSteps,
-        });
-      }
+      steps.push(...stageSteps);
+      stages.push({
+        stage: stageDef.stage,
+        policy: stageDef.policy,
+        ...(stageDef.join ? { join: stageDef.join } : {}),
+        steps: stageSteps,
+      });
     }
 
     return {
       version: graph.version,
-      stages: generatedStages,
-      steps: generatedSteps,
+      stages,
+      steps,
       onPartialFailure: graph.itinerary.onPartialFailure,
       decisionTtlMs: graph.itinerary.decisionTtlMs,
       onDecisionTimeout: graph.itinerary.onDecisionTimeout,
@@ -71,15 +60,9 @@ export class GraphService {
   }
 
   private extractProductTypes(items: ProductItemInput[]): string[] {
-    if (!Array.isArray(items) || items.length === 0) {
-      throw new BadRequestException(
-        'At least one product is required to generate a booking graph',
-      );
-    }
-
-    const types = items
+    const types = (Array.isArray(items) ? items : [])
       .map((item) => (typeof item === 'string' ? item : item?.type))
-      .filter((type) => Boolean(type?.trim()))
+      .filter((type): type is string => Boolean(type?.trim()))
       .map((type) => type.trim().toLowerCase());
 
     if (types.length === 0) {
@@ -97,86 +80,83 @@ export class GraphService {
     requested: string[],
     available: Record<string, ProductDefinition>,
   ): void {
-    const availableKeys = Object.keys(available);
-    for (const prod of requested) {
-      if (!available[prod]) {
+    for (const product of requested) {
+      if (!available[product]) {
         throw new BadRequestException(
-          `Unsupported product type: "${prod}". Supported products: ${availableKeys.join(', ')}`,
+          `Unsupported product type: "${product}". Supported products: ${Object.keys(available).join(', ')}`,
         );
       }
     }
   }
 
-  private shouldSkipStep(
+  private isStepIncluded(
     stepRef: string,
     requestedProducts: string[],
     graph: BookingGraph,
   ): boolean {
-    // Shared itinerary steps (fraud, payment, notify) are never skipped
+    // Shared itinerary steps (fraud, payment, notify) always run
     if (graph.itinerary.sharedSteps[stepRef]) {
-      return false;
+      return true;
     }
 
     const [product] = stepRef.split('.');
-    // Product steps are skipped if that product is not part of this booking
-    return !requestedProducts.includes(product);
+    return requestedProducts.includes(product);
   }
 
   private buildStep(
     stepRef: string,
     stage: number,
-    stepIndex: number,
     graph: BookingGraph,
-  ): GeneratedStepDto {
-    const sharedConfig: StepConfig | undefined =
-      graph.itinerary.sharedSteps[stepRef];
-
+  ): GeneratedStep {
+    const sharedConfig = graph.itinerary.sharedSteps[stepRef];
     if (sharedConfig) {
-      return {
-        stepIndex,
-        stage,
-        stepName: stepRef,
+      return this.toGeneratedStep(stepRef, stage, {
         scope: 'itinerary',
         product: null,
-        agent: sharedConfig.agent,
-        routingKey: sharedConfig.routingKey,
-        timeoutMs: sharedConfig.timeoutMs,
-        retry: {
-          max: sharedConfig.retry.max,
-          backoffMs: sharedConfig.retry.backoffMs,
-        },
-        ...(sharedConfig.compensate
-          ? { compensate: sharedConfig.compensate }
-          : {}),
-      };
+        config: sharedConfig,
+      });
     }
 
     const [product, action] = stepRef.split('.');
-    const productDef = graph.products[product];
-    const productConfig = productDef?.steps.find((s) => s.stepName === action);
-
-    if (!productConfig) {
+    const config = graph.products[product]?.steps.find(
+      (s) => s.stepName === action,
+    );
+    if (!config) {
       throw new BadRequestException(
         `Step configuration not found for "${stepRef}"`,
       );
     }
 
-    return {
-      stepIndex,
-      stage,
-      stepName: stepRef,
+    return this.toGeneratedStep(stepRef, stage, {
       scope: 'product',
       product,
-      agent: productConfig.agent,
-      routingKey: productConfig.routingKey,
-      timeoutMs: productConfig.timeoutMs,
+      config,
+    });
+  }
+
+  private toGeneratedStep(
+    stepRef: string,
+    stage: number,
+    options: {
+      scope: 'product' | 'itinerary';
+      product: string | null;
+      config: StepConfig;
+    },
+  ): GeneratedStep {
+    const { scope, product, config } = options;
+    return {
+      stage,
+      stepName: stepRef,
+      scope,
+      product,
+      agent: config.agent,
+      routingKey: config.routingKey,
+      timeoutMs: config.timeoutMs,
       retry: {
-        max: productConfig.retry.max,
-        backoffMs: productConfig.retry.backoffMs,
+        max: config.retry.max,
+        backoffMs: config.retry.backoffMs,
       },
-      ...(productConfig.compensate
-        ? { compensate: productConfig.compensate }
-        : {}),
+      ...(config.compensate ? { compensate: config.compensate } : {}),
     };
   }
 }

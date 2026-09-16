@@ -11,7 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { BadRequestException } from '@nestjs/common';
 import { GraphService } from './graph.service';
 import bookingGraphConfig from './config/booking-graph.config';
-import { GenerateGraphDto } from './dto';
+import { GenerateGraphInput } from './types';
 
 describe('GraphService', () => {
   let service: GraphService;
@@ -59,8 +59,6 @@ describe('GraphService', () => {
         'itinerary.payment',
         'itinerary.notify',
       ]);
-
-      expect(graph.steps.map((s) => s.stepIndex)).toEqual([0, 1, 2, 3, 4]);
 
       // Flight availability
       const flightAvail = graph.steps[0];
@@ -136,10 +134,6 @@ describe('GraphService', () => {
         'itinerary.notify',
       ]);
 
-      expect(graph.steps.map((s) => s.stepIndex)).toEqual([
-        0, 1, 2, 3, 4, 5, 6,
-      ]);
-
       // Stage 0 (parallel) has both availability steps
       expect(graph.stages[0].steps).toHaveLength(2);
       // Stage 2 (parallel, all_or_ask) has both allotment steps
@@ -150,7 +144,7 @@ describe('GraphService', () => {
 
   describe('two hotels + one flight support', () => {
     it('should handle multiple items of the same product type by deduplicating and generating full graph', () => {
-      const dto: GenerateGraphDto = {
+      const dto: GenerateGraphInput = {
         products: [{ type: 'hotel' }, { type: 'hotel' }, { type: 'flight' }],
       };
 

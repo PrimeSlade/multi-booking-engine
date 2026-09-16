@@ -1,1 +1,1 @@
-export * from './generate-graph.dto';
+export * from './generate-graph.types';
