@@ -65,8 +65,14 @@ docker-compose down
   - `feat(infra):` for Docker / environment changes
   - `chore(monorepo):` or `docs:` for root / documentation updates
 - **Pre-commit Hooks**: Husky runs `lint-staged` on staged files before each commit.
+- **No AI Attribution**: Do not add `Co-Authored-By` or any other AI attribution line to commit messages or PR descriptions.
 
 ---
 
 ## TypeScript Standards
 - **Prefer `type` over `interface`**: Consistently use `type` aliases rather than `interface` for object models, schema types, and data structures across both applications (`apps/api` and `apps/web`).
+
+---
+
+## Writing Style
+- **No em dashes**: Do not use the em dash (—) in code comments, commit messages, docs, or any written output. Use a comma, period, or parentheses instead.
