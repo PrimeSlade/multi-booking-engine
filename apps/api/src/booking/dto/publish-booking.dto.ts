@@ -52,14 +52,6 @@ export class FlightProductDto extends BookingProductDto {
   @IsString()
   flightNumber?: string;
 
-  @ApiPropertyOptional({
-    description: 'Operating airline name',
-    example: 'British Airways',
-  })
-  @IsOptional()
-  @IsString()
-  airlineName?: string;
-
   @ApiProperty({
     description: 'Origin IATA airport code or city',
     example: 'JFK',
@@ -152,16 +144,6 @@ export class HotelProductDto extends BookingProductDto {
   })
   @IsDateString()
   checkOut: string;
-
-  @ApiPropertyOptional({
-    description: 'Number of guests',
-    example: 2,
-    default: 1,
-  })
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  guests?: number;
 
   @ApiPropertyOptional({
     description: 'Number of rooms',
