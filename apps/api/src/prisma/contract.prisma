@@ -26,9 +26,8 @@ enum StepStatus {
 }
 
 model Booking {
-  id       String @id @default(uuid())
-  userId   String @map("user_id")
-  products Json
+  id     String @id @default(uuid())
+  userId String @map("user_id")
 
   status            BookingStatus      @default(in_progress)
   decisionExpiresAt TimestamptzString? @map("decision_expires_at")
@@ -36,9 +35,49 @@ model Booking {
   createdAt TimestamptzString          @default(now()) @map("created_at")
   updatedAt temporal.updatedAtString() @map("updated_at")
 
-  steps BookingStep[]
+  flightBookings FlightBooking[]
+  hotelBookings  HotelBooking[]
+  steps          BookingStep[]
 
   @@map("booking")
+}
+
+model FlightBooking {
+  id        String  @id @default(uuid())
+  bookingId String  @map("booking_id")
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
+  flightId      String            @map("flight_id")
+  flightNumber  String?           @map("flight_number")
+  origin        String
+  destination   String
+  departureDate TimestamptzString @map("departure_date")
+  passengers    Int               @default(1)
+
+  steps BookingStep[]
+
+  @@index([bookingId])
+  @@map("flight_booking")
+}
+
+model HotelBooking {
+  id        String  @id @default(uuid())
+  bookingId String  @map("booking_id")
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
+  hotelId   String            @map("hotel_id")
+  hotelName String?           @map("hotel_name")
+  roomId    String?           @map("room_id")
+  roomType  String?           @map("room_type")
+  city      String
+  checkIn   TimestamptzString @map("check_in")
+  checkOut  TimestamptzString @map("check_out")
+  rooms     Int               @default(1)
+
+  steps BookingStep[]
+
+  @@index([bookingId])
+  @@map("hotel_booking")
 }
 
 model BookingStep {
@@ -46,11 +85,16 @@ model BookingStep {
   bookingId String  @map("booking_id")
   booking   Booking @relation(fields: [bookingId], references: [id])
 
+  flightBookingId String?        @map("flight_booking_id")
+  flightBooking   FlightBooking? @relation(fields: [flightBookingId], references: [id])
+
+  hotelBookingId String?       @map("hotel_booking_id")
+  hotelBooking   HotelBooking? @relation(fields: [hotelBookingId], references: [id])
+
   stepIndex Int       @map("step_index")
   stage     Int
   stepName  String    @map("step_name")
   scope     StepScope
-  product   String?
   agent     String
 
   status    StepStatus                 @default(pending)
@@ -60,8 +104,14 @@ model BookingStep {
   error     Json?
   updatedAt temporal.updatedAtString() @map("updated_at")
 
-  @@unique([bookingId, stepName])
+  // No composite unique constraint here: Postgres exempts a row from a
+  // multi-column unique check entirely once any column in it is NULL, and
+  // every product-scope step has exactly one of flightBookingId/
+  // hotelBookingId NULL by design. GraphService + BookingService's fan-out
+  // already guarantee no duplicate (bookingId, stepName, item) rows.
   @@index([bookingId])
+  @@index([flightBookingId])
+  @@index([hotelBookingId])
   @@index([status])
   @@index([bookingId, stage])
   @@map("booking_step")

@@ -59,7 +59,7 @@ pnpm run prisma:migrate
 
 ## Coding Standards
 
-1. **DTOs**: Every incoming request must be validated using typed DTOs with `class-validator` decorators.
+1. **DTOs Across Layers**: Use DTOs for data structures and payloads passed across controller, service, or repository layers. Every incoming request must be validated using typed DTOs with `class-validator` decorators.
 2. **Modular Architecture**: Separate concerns cleanly between Controllers, Services, and Modules.
 3. **Error Handling**: Use NestJS built-in HTTP exceptions and structured error responses.
 4. **Resilience**: Ensure RabbitMQ step messages and DB transactions handle idempotent retries and compensations gracefully.
