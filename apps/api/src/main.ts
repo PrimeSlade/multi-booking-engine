@@ -6,7 +6,11 @@ import { AppModule } from '@/app.module';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import { AllExceptionsFilter } from '@/common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from '@/common/interceptors/response.interceptor';
-import { EXCHANGES, QUEUES } from '@/messaging/messaging.constants';
+import {
+  EXCHANGES,
+  QUEUES,
+  ROUTING_PATTERNS,
+} from '@/messaging/messaging.constants';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
@@ -19,27 +23,50 @@ async function bootstrap() {
     'amqp://localhost:5672',
   );
 
-  // Orchestrator Step Completed Queue (with DLQ configured)
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.RMQ,
-    options: {
-      urls: [rmqUrl],
-      queue: QUEUES.COMPLETED,
-      exchange: configService.get<string>(
-        'RABBITMQ_EXCHANGE',
-        EXCHANGES.BOOKING_TOPIC,
-      ),
-      exchangeType: 'topic',
-      wildcards: true,
-      noAck: false, // enables manual acknowledgment
-      queueOptions: {
-        durable: true,
-        arguments: {
-          'x-dead-letter-exchange': EXCHANGES.BOOKING_DLX,
+  const rmqExchange = configService.get<string>(
+    'RABBITMQ_EXCHANGE',
+    EXCHANGES.BOOKING_TOPIC,
+  );
+
+  // One RMQ listener per queue: the shared "step completed" queue, plus one
+  // per agent's own step queue (currently just flight-agent's availability
+  // check; more get appended here as agents are added).
+  //
+  // wildcards is off and routingKey is explicit on all of them: with
+  // wildcards on, a queue auto-binds to every @EventPattern registered
+  // anywhere in the app (registration is global, not scoped per
+  // connectMicroservice call), so every queue would end up receiving - and
+  // processing a duplicate copy of - every other queue's messages too. An
+  // explicit routingKey binds only what each queue is actually meant to
+  // receive.
+  const rmqListeners: Array<{ queue: string; routingKey: string }> = [
+    { queue: QUEUES.COMPLETED, routingKey: ROUTING_PATTERNS.ALL_COMPLETED },
+    {
+      queue: QUEUES.FLIGHT_AVAILABILITY,
+      routingKey: QUEUES.FLIGHT_AVAILABILITY,
+    },
+  ];
+
+  for (const { queue, routingKey } of rmqListeners) {
+    app.connectMicroservice<MicroserviceOptions>({
+      transport: Transport.RMQ,
+      options: {
+        urls: [rmqUrl],
+        queue,
+        exchange: rmqExchange,
+        exchangeType: 'topic',
+        wildcards: false,
+        routingKey,
+        noAck: false, // enables manual acknowledgment
+        queueOptions: {
+          durable: true,
+          arguments: {
+            'x-dead-letter-exchange': EXCHANGES.BOOKING_DLX,
+          },
         },
       },
-    },
-  });
+    });
+  }
 
   await app.startAllMicroservices();
 
