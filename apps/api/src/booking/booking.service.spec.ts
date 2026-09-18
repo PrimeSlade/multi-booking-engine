@@ -9,6 +9,10 @@ jest.mock('@/prisma/prisma.service', () => ({
 import { Test, TestingModule } from '@nestjs/testing';
 import { BookingService } from './booking.service';
 import { PrismaService } from '@/prisma/prisma.service';
+import {
+  StepDispatchService,
+  StepPair,
+} from '@/dispatch/step-dispatch.service';
 import { GraphService } from '@/graph/graph.service';
 import { PublishBookingDto } from './dto/publish-booking.dto';
 
@@ -161,12 +165,19 @@ describe('BookingService', () => {
     }),
   };
 
+  const mockDispatchService = {
+    dispatchStage0: jest
+      .fn<Promise<void>, [StepPair[]]>()
+      .mockResolvedValue(undefined),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BookingService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: GraphService, useValue: mockGraphService },
+        { provide: StepDispatchService, useValue: mockDispatchService },
       ],
     }).compile();
 
@@ -271,6 +282,19 @@ describe('BookingService', () => {
       );
       expect(fraudStep?.flightBookingId).toBeNull();
       expect(fraudStep?.hotelBookingId).toBeNull();
+
+      // Only stage-0 steps (flight.availability + the 2 hotel.availability
+      // rows) are dispatched; itinerary.fraud is stage 1 and stays out.
+      expect(mockDispatchService.dispatchStage0).toHaveBeenCalledTimes(1);
+      const dispatchedPairs =
+        mockDispatchService.dispatchStage0.mock.calls[0][0];
+      expect(dispatchedPairs).toHaveLength(3);
+      expect(dispatchedPairs.every((p) => p.generated.stage === 0)).toBe(true);
+      expect(dispatchedPairs.map((p) => p.step.stepName).sort()).toEqual([
+        'flight.availability',
+        'hotel.availability',
+        'hotel.availability',
+      ]);
 
       expect(result.id).toBe('booking-uuid-1');
     });
