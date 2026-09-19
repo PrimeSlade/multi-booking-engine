@@ -34,3 +34,11 @@ export const ROUTING_PATTERNS = {
   ALL_COMPLETED: 'booking.step.completed.#',
   ALL_COMPENSATE: 'booking.step.compensate.#',
 } as const;
+
+// Exact completion routing keys a consumer can @EventPattern() against.
+// wildcards is off on the completed queue (see main.ts), so dispatch is
+// exact-match only - a wildcard pattern here would never fire. Grows one
+// entry at a time as each agent starts publishing completions.
+export const COMPLETION_ROUTING_KEYS = {
+  FLIGHT_AVAILABILITY: 'booking.step.completed.flight.availability',
+} as const;

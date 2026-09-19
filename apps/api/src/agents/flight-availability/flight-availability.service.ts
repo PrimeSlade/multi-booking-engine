@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 
+export type AvailabilityOutcome =
+  { available: true; seatsLeft: number } | { available: false };
+
 @Injectable()
 export class FlightAvailabilityService {
   constructor(private readonly prisma: PrismaService) {}
 
   async checkAvailability(
     flightBookingId: string | null,
-  ): Promise<{ available: boolean; seatsLeft?: number }> {
+  ): Promise<AvailabilityOutcome> {
     if (!flightBookingId) {
       return { available: false };
     }

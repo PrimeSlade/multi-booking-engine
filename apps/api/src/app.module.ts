@@ -6,6 +6,7 @@ import { FlightAvailabilityModule } from '@/agents/flight-availability/flight-av
 import { BookingModule } from '@/booking/booking.module';
 import { CatalogModule } from '@/catalog/catalog.module';
 import { MessagingModule } from '@/messaging/messaging.module';
+import { OrchestratorModule } from '@/orchestrator/orchestrator.module';
 import { PrismaModule } from '@/prisma/prisma.module';
 import bookingGraphConfig from '@/graph/config/booking-graph.config';
 import { GraphModule } from '@/graph/graph.module';
@@ -22,6 +23,7 @@ import { GraphModule } from '@/graph/graph.module';
     MessagingModule,
     GraphModule,
     FlightAvailabilityModule,
+    OrchestratorModule,
   ],
   controllers: [AppController],
   providers: [AppService],
