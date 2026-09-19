@@ -4,12 +4,16 @@ import type { Channel, Message } from 'amqplib';
 import { COMPLETION_ROUTING_KEYS } from '@/messaging/messaging.constants';
 import { BookingStepCompletionMessage } from '@/messaging/messaging.types';
 import { StepCompletionService } from '@/orchestrator/step-completion.service';
+import { StageAdvancementService } from '@/orchestrator/stage-advancement.service';
 
 @Controller()
 export class StepCompletionController {
   private readonly logger = new Logger(StepCompletionController.name);
 
-  constructor(private readonly completionService: StepCompletionService) {}
+  constructor(
+    private readonly completionService: StepCompletionService,
+    private readonly stageAdvancementService: StageAdvancementService,
+  ) {}
 
   @EventPattern(Object.values(COMPLETION_ROUTING_KEYS))
   async handle(
@@ -20,7 +24,10 @@ export class StepCompletionController {
     const originalMsg = context.getMessage() as Message;
 
     try {
-      await this.completionService.applyCompletion(data);
+      const updated = await this.completionService.applyCompletion(data);
+      if (updated) {
+        await this.stageAdvancementService.maybeAdvance(updated);
+      }
       channel.ack(originalMsg);
     } catch (err) {
       this.logger.error(

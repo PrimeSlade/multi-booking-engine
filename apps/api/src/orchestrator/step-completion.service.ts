@@ -8,7 +8,10 @@ export class StepCompletionService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async applyCompletion(message: BookingStepCompletionMessage): Promise<void> {
+  // Returns the updated row (or null) rather than void so callers - namely
+  // StageAdvancementService - can read .stage/.status/.bookingId off it
+  // without an extra query.
+  async applyCompletion(message: BookingStepCompletionMessage) {
     // .update() is the single-row verb here: returns the updated row, or
     // null if nothing matched (updateAll()/updateAndCount() are the
     // bulk/streaming/count-only forms - not what we want for a lookup by id).
@@ -32,5 +35,7 @@ export class StepCompletionService {
         `No BookingStep row found for stepId=${message.stepId} (bookingId=${message.bookingId})`,
       );
     }
+
+    return updated;
   }
 }

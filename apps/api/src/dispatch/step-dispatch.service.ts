@@ -26,7 +26,7 @@ export class StepDispatchService {
     @Inject(BOOKING_RMQ_CLIENT) private readonly client: ClientProxy,
   ) {}
 
-  async dispatchStage0(pairs: StepPair[]): Promise<void> {
+  async dispatchSteps(pairs: StepPair[]): Promise<void> {
     const results = await Promise.allSettled(
       pairs.map((pair) => this.publishStep(pair)),
     );

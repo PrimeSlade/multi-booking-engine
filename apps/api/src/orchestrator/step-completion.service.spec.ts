@@ -100,6 +100,6 @@ describe('StepCompletionService', () => {
         result: { seatsLeft: 5 },
         error: null,
       }),
-    ).resolves.toBeUndefined();
+    ).resolves.toBeNull();
   });
 });

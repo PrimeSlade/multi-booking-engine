@@ -31,7 +31,7 @@ describe('StepDispatchService', () => {
     const service = new StepDispatchService({ emit } as never);
 
     const pair = buildPair();
-    await service.dispatchStage0([pair]);
+    await service.dispatchSteps([pair]);
 
     expect(emit).toHaveBeenCalledTimes(1);
     expect(emit).toHaveBeenCalledWith('booking.step.flight.availability', {
@@ -60,7 +60,7 @@ describe('StepDispatchService', () => {
       buildPair({ id: 'step-2', hotelBookingId: 'hotel-booking-1' }),
     ];
 
-    await expect(service.dispatchStage0(pairs)).resolves.toBeUndefined();
+    await expect(service.dispatchSteps(pairs)).resolves.toBeUndefined();
     expect(emit).toHaveBeenCalledTimes(2);
   });
 });

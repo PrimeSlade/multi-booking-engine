@@ -110,7 +110,7 @@ export class BookingService {
       (pair) => pair.generated.stage === 0,
     );
 
-    await this.dispatchService.dispatchStage0(stage0Pairs);
+    await this.dispatchService.dispatchSteps(stage0Pairs);
 
     return {
       ...booking,

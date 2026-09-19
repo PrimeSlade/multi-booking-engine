@@ -166,7 +166,7 @@ describe('BookingService', () => {
   };
 
   const mockDispatchService = {
-    dispatchStage0: jest
+    dispatchSteps: jest
       .fn<Promise<void>, [StepPair[]]>()
       .mockResolvedValue(undefined),
   };
@@ -285,9 +285,9 @@ describe('BookingService', () => {
 
       // Only stage-0 steps (flight.availability + the 2 hotel.availability
       // rows) are dispatched; itinerary.fraud is stage 1 and stays out.
-      expect(mockDispatchService.dispatchStage0).toHaveBeenCalledTimes(1);
+      expect(mockDispatchService.dispatchSteps).toHaveBeenCalledTimes(1);
       const dispatchedPairs =
-        mockDispatchService.dispatchStage0.mock.calls[0][0];
+        mockDispatchService.dispatchSteps.mock.calls[0][0];
       expect(dispatchedPairs).toHaveLength(3);
       expect(dispatchedPairs.every((p) => p.generated.stage === 0)).toBe(true);
       expect(dispatchedPairs.map((p) => p.step.stepName).sort()).toEqual([
