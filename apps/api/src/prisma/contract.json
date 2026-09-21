@@ -24,6 +24,10 @@
       "model": "FlightBooking",
       "namespace": "public"
     },
+    "fraud_blacklist": {
+      "model": "FraudBlacklist",
+      "namespace": "public"
+    },
     "hotel": {
       "model": "Hotel",
       "namespace": "public"
@@ -726,6 +730,27 @@
               },
               "namespaceId": "public",
               "table": "flight_booking"
+            }
+          },
+          "FraudBlacklist": {
+            "fields": {
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "fraud_blacklist"
             }
           },
           "Hotel": {
@@ -1468,6 +1493,23 @@
               },
               "uniques": []
             },
+            "fraud_blacklist": {
+              "columns": {
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "user_id"
+                ]
+              },
+              "uniques": []
+            },
             "hotel": {
               "columns": {
                 "city": {
@@ -1690,7 +1732,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "20d08b762e23a247a5236607c810261051fe8a97a9eb1e74b07e5a76eccd5bc3"
+    "storageHash": "a616477d2bfa7cc4f32bedcfd728aa4161e51ac5c610ffe603cfc27ac4aa7a2f"
   },
   "execution": {
     "executionHash": "efbc1e60f192c8645e4a372146a84c7f56e02402c3446adae30e1f940443f322",

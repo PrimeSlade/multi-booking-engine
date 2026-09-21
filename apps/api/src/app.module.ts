@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
 import { FlightAvailabilityModule } from '@/agents/flight-availability/flight-availability.module';
+import { FraudModule } from '@/agents/fraud/fraud.module';
 import { BookingModule } from '@/booking/booking.module';
 import { CatalogModule } from '@/catalog/catalog.module';
 import { MessagingModule } from '@/messaging/messaging.module';
@@ -23,6 +24,7 @@ import { GraphModule } from '@/graph/graph.module';
     MessagingModule,
     GraphModule,
     FlightAvailabilityModule,
+    FraudModule,
     OrchestratorModule,
   ],
   controllers: [AppController],

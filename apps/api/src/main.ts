@@ -29,8 +29,9 @@ async function bootstrap() {
   );
 
   // One RMQ listener per queue: the shared "step completed" queue, plus one
-  // per agent's own step queue (currently just flight-agent's availability
-  // check; more get appended here as agents are added).
+  // per agent's own step queue (currently flight-agent's availability check
+  // and fraud-agent's fraud check; more get appended here as agents are
+  // added).
   //
   // wildcards is off and routingKey is explicit on all of them: with
   // wildcards on, a queue auto-binds to every @EventPattern registered
@@ -45,6 +46,7 @@ async function bootstrap() {
       queue: QUEUES.FLIGHT_AVAILABILITY,
       routingKey: QUEUES.FLIGHT_AVAILABILITY,
     },
+    { queue: QUEUES.FRAUD, routingKey: QUEUES.FRAUD },
   ];
 
   for (const { queue, routingKey } of rmqListeners) {
