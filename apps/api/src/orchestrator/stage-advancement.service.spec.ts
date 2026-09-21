@@ -13,6 +13,7 @@ describe('StageAdvancementService', () => {
     db: {
       orm: {
         public: {
+          Booking: { where: jest.Mock };
           BookingStep: { where: jest.Mock };
           FlightBooking: { where: jest.Mock };
           HotelBooking: { where: jest.Mock };
@@ -48,6 +49,7 @@ describe('StageAdvancementService', () => {
       db: {
         orm: {
           public: {
+            Booking: { where: jest.fn() },
             BookingStep: { where: jest.fn() },
             FlightBooking: { where: jest.fn().mockReturnValue(whereAll([])) },
             HotelBooking: { where: jest.fn().mockReturnValue(whereAll([])) },
@@ -66,10 +68,42 @@ describe('StageAdvancementService', () => {
     );
   });
 
-  it('does nothing for a failed completion', async () => {
+  it('cancels the booking when the triggering step itself failed', async () => {
+    mockPrisma.db.orm.public.BookingStep.where
+      .mockReturnValueOnce(whereAll([{ ...completedStep, status: 'failed' }]))
+      .mockReturnValueOnce({
+        updateAll: jest.fn().mockResolvedValue([]),
+      });
+    const bookingUpdate = jest.fn().mockResolvedValue({ id: 'booking-1' });
+    mockPrisma.db.orm.public.Booking.where.mockReturnValue({
+      update: bookingUpdate,
+    });
+
     await service.maybeAdvance({ ...completedStep, status: 'failed' } as never);
 
-    expect(mockPrisma.db.orm.public.BookingStep.where).not.toHaveBeenCalled();
+    expect(mockPrisma.db.orm.public.Booking.where).toHaveBeenCalledWith({
+      id: 'booking-1',
+      status: 'in_progress',
+    });
+    expect(bookingUpdate).toHaveBeenCalledWith({ status: 'failed' });
+    expect(mockDispatchService.dispatchSteps).not.toHaveBeenCalled();
+  });
+
+  it('does not cancel again when the booking was already cancelled', async () => {
+    mockPrisma.db.orm.public.BookingStep.where.mockReturnValueOnce(
+      whereAll([{ ...completedStep, status: 'failed' }]),
+    );
+    const bookingUpdate = jest.fn().mockResolvedValue(null);
+    mockPrisma.db.orm.public.Booking.where.mockReturnValue({
+      update: bookingUpdate,
+    });
+
+    await service.maybeAdvance({ ...completedStep, status: 'failed' } as never);
+
+    expect(bookingUpdate).toHaveBeenCalledTimes(1);
+    // Only the stage-lookup call happened - no second BookingStep.where for
+    // the bulk-cancel updateAll, since the booking-level claim lost the race.
+    expect(mockPrisma.db.orm.public.BookingStep.where).toHaveBeenCalledTimes(1);
   });
 
   it('does not advance while a sibling step is still pending', async () => {
@@ -91,21 +125,34 @@ describe('StageAdvancementService', () => {
     expect(mockDispatchService.dispatchSteps).not.toHaveBeenCalled();
   });
 
-  it('does not advance when a sibling step failed', async () => {
-    mockPrisma.db.orm.public.BookingStep.where.mockReturnValueOnce(
-      whereAll([
-        { ...completedStep, status: 'success' },
-        {
-          ...completedStep,
-          id: 'step-2',
-          stepName: 'hotel.availability',
-          status: 'failed',
-        },
-      ]),
-    );
+  it('cancels the booking when a sibling step already failed', async () => {
+    const cancelStepsUpdateAll = jest.fn().mockResolvedValue([]);
+    mockPrisma.db.orm.public.BookingStep.where
+      .mockReturnValueOnce(
+        whereAll([
+          { ...completedStep, status: 'success' },
+          {
+            ...completedStep,
+            id: 'step-2',
+            stepName: 'hotel.availability',
+            status: 'failed',
+          },
+        ]),
+      )
+      .mockReturnValueOnce({ updateAll: cancelStepsUpdateAll });
+    const bookingUpdate = jest.fn().mockResolvedValue({ id: 'booking-1' });
+    mockPrisma.db.orm.public.Booking.where.mockReturnValue({
+      update: bookingUpdate,
+    });
 
     await service.maybeAdvance(completedStep as never);
 
+    expect(bookingUpdate).toHaveBeenCalledWith({ status: 'failed' });
+    expect(cancelStepsUpdateAll).toHaveBeenCalledWith({
+      status: 'failed',
+      error: { code: 'BOOKING_CANCELLED', retryable: false },
+    });
+    expect(mockGraphService.generate).not.toHaveBeenCalled();
     expect(mockDispatchService.dispatchSteps).not.toHaveBeenCalled();
   });
 

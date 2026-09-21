@@ -22,8 +22,6 @@ export class StageAdvancementService {
   ) {}
 
   async maybeAdvance(step: CompletedStep): Promise<void> {
-    if (step.status !== 'success') return; // failure/join handling deferred
-
     const stageSteps = await this.prisma.db.orm.public.BookingStep.where({
       bookingId: step.bookingId,
       stage: step.stage,
@@ -31,17 +29,20 @@ export class StageAdvancementService {
       .all()
       .toArray();
 
+    // Fail-fast: cancel on the first failed step in the stage, regardless of
+    // whether it was this completion or an already-reported sibling. Not
+    // waiting for every sibling to report is the join/all_or_ask policy's
+    // job (deferred - see TASKS.md); this only covers "nothing was
+    // committed yet, so there's nothing to compensate."
+    if (stageSteps.some((s: { status: string }) => s.status === 'failed')) {
+      await this.cancelBooking(step.bookingId, step.stage);
+      return;
+    }
+
     const allSuccess = stageSteps.every(
       (s: { status: string }) => s.status === 'success',
     );
-    if (!allSuccess) {
-      if (stageSteps.some((s: { status: string }) => s.status === 'failed')) {
-        this.logger.warn(
-          `Stage ${step.stage} for booking ${step.bookingId} has a failed step; not advancing (partial-failure/join handling not implemented yet)`,
-        );
-      }
-      return; // still waiting on siblings, or blocked on a failure
-    }
+    if (!allSuccess) return; // still waiting on siblings
 
     const [flightBookings, hotelBookings] = await Promise.all([
       this.prisma.db.orm.public.FlightBooking.where({
@@ -99,5 +100,27 @@ export class StageAdvancementService {
     });
 
     await this.dispatchService.dispatchSteps(pairs);
+  }
+
+  private async cancelBooking(bookingId: string, stage: number): Promise<void> {
+    // Conditional claim, same idiom as the stage-dispatch claim above: if
+    // multiple failures race (or a later stage's own step also fails),
+    // only the first one to see status still 'in_progress' does the work.
+    const bookingUpdated = await this.prisma.db.orm.public.Booking.where({
+      id: bookingId,
+      status: 'in_progress',
+    }).update({ status: 'failed' });
+
+    if (bookingUpdated === null) return; // already cancelled
+
+    await this.prisma.db.orm.public.BookingStep.where({
+      bookingId,
+      status: 'pending',
+    }).updateAll({
+      status: 'failed',
+      error: { code: 'BOOKING_CANCELLED', retryable: false },
+    });
+
+    this.logger.warn(`Booking ${bookingId} cancelled: stage ${stage} failed`);
   }
 }
