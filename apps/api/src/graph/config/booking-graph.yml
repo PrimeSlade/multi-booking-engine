@@ -90,7 +90,7 @@ itinerary:
       routingKey: booking.step.itinerary.fraud
       timeoutMs: 4000
       retry:
-        max: 2
+        max: 0
         backoffMs: 1000
     itinerary.payment:
       agent: payment-agent
