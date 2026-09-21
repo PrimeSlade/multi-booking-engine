@@ -12,6 +12,7 @@ import {
   createBooking,
   fetchAvailableFlights,
   fetchAvailableHotels,
+  fetchBooking,
 } from '@/lib/api/client';
 import type {
   Booking,
@@ -29,6 +30,9 @@ type RequestState =
   | { status: 'error'; message: string };
 
 type Tab = 'flights' | 'hotels';
+
+const TERMINAL_STEP_STATUSES = new Set(['success', 'failed', 'compensated']);
+const BOOKING_POLL_INTERVAL_MS = 2000;
 
 export function App() {
   const [flights, setFlights] = useState<Flight[]>([]);
@@ -76,6 +80,38 @@ export function App() {
     }
     void load();
   }, []);
+
+  // The confirmation page shows step statuses, but createBooking's response
+  // is a one-time snapshot from the moment the booking was submitted - the
+  // orchestrator updates step statuses asynchronously afterward via
+  // RabbitMQ, so without re-fetching, the UI stays frozen on "pending"
+  // forever even after steps actually succeed or fail. Poll until every
+  // step reaches a terminal status.
+  useEffect(() => {
+    if (!confirmedBooking) return;
+    if (
+      confirmedBooking.steps.every((step) =>
+        TERMINAL_STEP_STATUSES.has(step.status),
+      )
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const fresh = await fetchBooking(confirmedBooking.id);
+        if (!cancelled) setConfirmedBooking(fresh);
+      } catch (err) {
+        console.error('[Booking poll]', err);
+      }
+    }, BOOKING_POLL_INTERVAL_MS);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [confirmedBooking]);
 
   const selectedFlight = flights.find((f) => f.id === selectedFlightId);
 
