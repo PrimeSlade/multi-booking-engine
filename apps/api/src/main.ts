@@ -47,6 +47,7 @@ async function bootstrap() {
       routingKey: QUEUES.FLIGHT_AVAILABILITY,
     },
     { queue: QUEUES.FRAUD, routingKey: QUEUES.FRAUD },
+    { queue: QUEUES.FLIGHT_ALLOTMENT, routingKey: QUEUES.FLIGHT_ALLOTMENT },
   ];
 
   for (const { queue, routingKey } of rmqListeners) {

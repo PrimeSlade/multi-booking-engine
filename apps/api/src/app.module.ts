@@ -4,6 +4,7 @@ import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
 import { FlightAvailabilityModule } from '@/agents/flight-availability/flight-availability.module';
 import { FraudModule } from '@/agents/fraud/fraud.module';
+import { FlightAllotmentModule } from '@/agents/flight-allotment/flight-allotment.module';
 import { BookingModule } from '@/booking/booking.module';
 import { CatalogModule } from '@/catalog/catalog.module';
 import { MessagingModule } from '@/messaging/messaging.module';
@@ -25,6 +26,7 @@ import { GraphModule } from '@/graph/graph.module';
     GraphModule,
     FlightAvailabilityModule,
     FraudModule,
+    FlightAllotmentModule,
     OrchestratorModule,
   ],
   controllers: [AppController],
