@@ -63,4 +63,56 @@ describe('StepDispatchService', () => {
     await expect(service.dispatchSteps(pairs)).resolves.toBeUndefined();
     expect(emit).toHaveBeenCalledTimes(2);
   });
+
+  describe('dispatchCompensations', () => {
+    const buildRow = (
+      overrides: Partial<StepPair['step']> = {},
+    ): StepPair['step'] => ({
+      id: 'step-1',
+      bookingId: 'booking-1',
+      stepName: 'flight.allotment',
+      scope: 'product',
+      agent: 'flight-agent',
+      flightBookingId: 'flight-booking-1',
+      hotelBookingId: null,
+      attempt: 0,
+      ...overrides,
+    });
+
+    it('emits one compensate message per row', async () => {
+      const emit = jest.fn().mockReturnValue(of(undefined));
+      const service = new StepDispatchService({ emit } as never);
+
+      await service.dispatchCompensations([buildRow()]);
+
+      expect(emit).toHaveBeenCalledTimes(1);
+      expect(emit).toHaveBeenCalledWith(
+        'booking.step.compensate.flight.allotment',
+        {
+          stepId: 'step-1',
+          bookingId: 'booking-1',
+          stepName: 'flight.allotment',
+          scope: 'product',
+          agent: 'flight-agent',
+          flightBookingId: 'flight-booking-1',
+          hotelBookingId: null,
+        },
+      );
+    });
+
+    it('does not let one failed publish stop the others', async () => {
+      const emit = jest
+        .fn()
+        .mockReturnValueOnce(throwError(() => new Error('broker unreachable')))
+        .mockReturnValueOnce(of(undefined));
+      const service = new StepDispatchService({ emit } as never);
+
+      const rows = [buildRow({ id: 'step-1' }), buildRow({ id: 'step-2' })];
+
+      await expect(
+        service.dispatchCompensations(rows),
+      ).resolves.toBeUndefined();
+      expect(emit).toHaveBeenCalledTimes(2);
+    });
+  });
 });

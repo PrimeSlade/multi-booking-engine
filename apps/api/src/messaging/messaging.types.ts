@@ -19,3 +19,9 @@ export type BookingStepCompletionMessage = {
   result?: Record<string, JsonValue> | null;
   error?: { code: string; message?: string; retryable: boolean } | null;
 };
+
+export type BookingStepCompensatedMessage = {
+  stepId: string;
+  bookingId: string;
+  stepName: string;
+};

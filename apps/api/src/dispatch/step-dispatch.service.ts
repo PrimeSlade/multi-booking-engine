@@ -3,7 +3,10 @@ import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { BOOKING_RMQ_CLIENT } from '@/messaging/messaging.constants';
 import { GeneratedStep } from '@/graph';
-import { BookingStepDispatchMessage } from '@/dispatch/dispatch.types';
+import {
+  BookingStepCompensateMessage,
+  BookingStepDispatchMessage,
+} from '@/dispatch/dispatch.types';
 
 export type BookingStepRow = {
   id: string;
@@ -59,5 +62,39 @@ export class StepDispatchService {
     };
 
     await firstValueFrom(this.client.emit(generated.routingKey, message));
+  }
+
+  async dispatchCompensations(rows: BookingStepRow[]): Promise<void> {
+    const results = await Promise.allSettled(
+      rows.map((row) => this.publishCompensation(row)),
+    );
+
+    results.forEach((result, i) => {
+      if (result.status === 'rejected') {
+        const row = rows[i];
+        this.logger.error(
+          `Failed to dispatch compensation for step "${row.stepName}" (stepId=${row.id}, bookingId=${row.bookingId})`,
+          result.reason instanceof Error
+            ? result.reason.stack
+            : String(result.reason),
+        );
+      }
+    });
+  }
+
+  private async publishCompensation(row: BookingStepRow): Promise<void> {
+    const message: BookingStepCompensateMessage = {
+      stepId: row.id,
+      bookingId: row.bookingId,
+      stepName: row.stepName,
+      scope: row.scope,
+      agent: row.agent,
+      flightBookingId: row.flightBookingId,
+      hotelBookingId: row.hotelBookingId,
+    };
+
+    await firstValueFrom(
+      this.client.emit(`booking.step.compensate.${row.stepName}`, message),
+    );
   }
 }

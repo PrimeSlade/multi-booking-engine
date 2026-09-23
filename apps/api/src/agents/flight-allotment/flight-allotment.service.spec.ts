@@ -89,4 +89,52 @@ describe('FlightAllotmentService', () => {
     expect(result).toEqual({ reserved: false });
     expect(mockPrisma.db.orm.public.FlightBooking.where).not.toHaveBeenCalled();
   });
+
+  describe('releaseSeat', () => {
+    it('returns released when the seat is given back', async () => {
+      mockPrisma.db.orm.public.FlightBooking.where.mockReturnValue(
+        mockFirst({ id: 'fb-1', flightId: 'flight-1', passengers: 2 }),
+      );
+      mockPrisma.db.runtime.mockReturnValue({
+        query: jest.fn().mockResolvedValue([{ id: 'flight-1', seats_left: 5 }]),
+      });
+
+      const result = await service.releaseSeat('fb-1');
+
+      expect(result).toEqual({ released: true });
+    });
+
+    it('returns not released when no row matched', async () => {
+      mockPrisma.db.orm.public.FlightBooking.where.mockReturnValue(
+        mockFirst({ id: 'fb-1', flightId: 'flight-1', passengers: 2 }),
+      );
+      mockPrisma.db.runtime.mockReturnValue({
+        query: jest.fn().mockResolvedValue([]),
+      });
+
+      const result = await service.releaseSeat('fb-1');
+
+      expect(result).toEqual({ released: false });
+    });
+
+    it('returns not released when the flight booking is missing', async () => {
+      mockPrisma.db.orm.public.FlightBooking.where.mockReturnValue(
+        mockFirst(null),
+      );
+
+      const result = await service.releaseSeat('fb-missing');
+
+      expect(result).toEqual({ released: false });
+      expect(mockPrisma.db.runtime).not.toHaveBeenCalled();
+    });
+
+    it('returns not released when flightBookingId is null', async () => {
+      const result = await service.releaseSeat(null);
+
+      expect(result).toEqual({ released: false });
+      expect(
+        mockPrisma.db.orm.public.FlightBooking.where,
+      ).not.toHaveBeenCalled();
+    });
+  });
 });

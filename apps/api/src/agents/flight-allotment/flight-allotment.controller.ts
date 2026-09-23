@@ -8,8 +8,14 @@ import {
 } from '@nestjs/microservices';
 import type { Channel, Message } from 'amqplib';
 import { BOOKING_RMQ_CLIENT, QUEUES } from '@/messaging/messaging.constants';
-import { BookingStepCompletionMessage } from '@/messaging/messaging.types';
-import { BookingStepDispatchMessage } from '@/dispatch/dispatch.types';
+import {
+  BookingStepCompensatedMessage,
+  BookingStepCompletionMessage,
+} from '@/messaging/messaging.types';
+import {
+  BookingStepCompensateMessage,
+  BookingStepDispatchMessage,
+} from '@/dispatch/dispatch.types';
 import { firstValueFrom } from 'rxjs';
 import { FlightAllotmentService } from '@/agents/flight-allotment/flight-allotment.service';
 
@@ -84,6 +90,45 @@ export class FlightAllotmentController {
     } catch (err) {
       this.logger.error(
         `Failed to publish completion for stepId=${data.stepId}`,
+        err instanceof Error ? err.stack : String(err),
+      );
+    }
+  }
+
+  @EventPattern(QUEUES.FLIGHT_ALLOTMENT_COMPENSATE)
+  async handleCompensate(
+    @Payload() data: BookingStepCompensateMessage,
+    @Ctx() context: RmqContext,
+  ) {
+    const channel = context.getChannelRef() as Channel;
+    const originalMsg = context.getMessage() as Message;
+
+    try {
+      await this.allotmentService.releaseSeat(data.flightBookingId);
+      channel.ack(originalMsg);
+    } catch (err) {
+      this.logger.error(
+        `flight.allotment compensation failed for stepId=${data.stepId}`,
+        err instanceof Error ? err.stack : String(err),
+      );
+      // No DLQ consumer exists yet, so requeueing would just loop forever.
+      channel.nack(originalMsg, false, false);
+      return;
+    }
+
+    const message: BookingStepCompensatedMessage = {
+      stepId: data.stepId,
+      bookingId: data.bookingId,
+      stepName: data.stepName,
+    };
+
+    try {
+      await firstValueFrom(
+        this.client.emit(`booking.step.compensated.${data.stepName}`, message),
+      );
+    } catch (err) {
+      this.logger.error(
+        `Failed to publish compensated event for stepId=${data.stepId}`,
         err instanceof Error ? err.stack : String(err),
       );
     }

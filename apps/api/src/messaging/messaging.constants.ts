@@ -28,11 +28,16 @@ export const QUEUES = {
 
   // Step Worker Queues (Stage 4 - Sequential)
   NOTIFY: 'booking.step.itinerary.notify',
+
+  // Compensation (saga rollback)
+  FLIGHT_ALLOTMENT_COMPENSATE: 'booking.step.compensate.flight.allotment',
+  COMPENSATED: 'booking.step.compensated',
 } as const;
 
 export const ROUTING_PATTERNS = {
   ALL_COMPLETED: 'booking.step.completed.#',
   ALL_COMPENSATE: 'booking.step.compensate.#',
+  ALL_COMPENSATED: 'booking.step.compensated.#',
 } as const;
 
 // Exact completion routing keys a consumer can @EventPattern() against.
@@ -44,4 +49,12 @@ export const COMPLETION_ROUTING_KEYS = {
   FRAUD: 'booking.step.completed.itinerary.fraud',
   FLIGHT_ALLOTMENT: 'booking.step.completed.flight.allotment',
   PAYMENT: 'booking.step.completed.itinerary.payment',
+} as const;
+
+// Same idea as COMPLETION_ROUTING_KEYS, but for "I finished undoing this
+// step" events - the orchestrator-side compensated-consumer needs an
+// exact-match array to @EventPattern() against for the same wildcards:false
+// reason.
+export const COMPENSATED_ROUTING_KEYS = {
+  FLIGHT_ALLOTMENT: 'booking.step.compensated.flight.allotment',
 } as const;

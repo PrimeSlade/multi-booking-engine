@@ -6,7 +6,10 @@ import { of, throwError } from 'rxjs';
 import type { RmqContext } from '@nestjs/microservices';
 import { FlightAllotmentController } from './flight-allotment.controller';
 import { FlightAllotmentService } from './flight-allotment.service';
-import { BookingStepDispatchMessage } from '@/dispatch/dispatch.types';
+import {
+  BookingStepCompensateMessage,
+  BookingStepDispatchMessage,
+} from '@/dispatch/dispatch.types';
 
 describe('FlightAllotmentController', () => {
   const baseMessage: BookingStepDispatchMessage = {
@@ -127,5 +130,79 @@ describe('FlightAllotmentController', () => {
       controller.handle(baseMessage, context),
     ).resolves.toBeUndefined();
     expect(channel.ack).toHaveBeenCalledTimes(1);
+  });
+
+  describe('handleCompensate', () => {
+    const compensateMessage: BookingStepCompensateMessage = {
+      stepId: 'step-1',
+      bookingId: 'booking-1',
+      stepName: 'flight.allotment',
+      scope: 'product',
+      agent: 'flight-agent',
+      flightBookingId: 'flight-booking-1',
+      hotelBookingId: null,
+    };
+
+    it('acks and publishes a compensated event when the seat is released', async () => {
+      const emit = jest.fn().mockReturnValue(of(undefined));
+      const allotmentService = {
+        releaseSeat: jest.fn().mockResolvedValue({ released: true }),
+      } as unknown as FlightAllotmentService;
+      const controller = new FlightAllotmentController(
+        { emit } as never,
+        allotmentService,
+      );
+      const { channel, context } = buildContext();
+
+      await controller.handleCompensate(compensateMessage, context);
+
+      expect(channel.ack).toHaveBeenCalledTimes(1);
+      expect(channel.nack).not.toHaveBeenCalled();
+      expect(emit).toHaveBeenCalledWith(
+        'booking.step.compensated.flight.allotment',
+        {
+          stepId: 'step-1',
+          bookingId: 'booking-1',
+          stepName: 'flight.allotment',
+        },
+      );
+    });
+
+    it('nacks and never publishes when the release throws', async () => {
+      const emit = jest.fn().mockReturnValue(of(undefined));
+      const allotmentService = {
+        releaseSeat: jest.fn().mockRejectedValue(new Error('db down')),
+      } as unknown as FlightAllotmentService;
+      const controller = new FlightAllotmentController(
+        { emit } as never,
+        allotmentService,
+      );
+      const { channel, context } = buildContext();
+
+      await controller.handleCompensate(compensateMessage, context);
+
+      expect(channel.nack).toHaveBeenCalledWith({}, false, false);
+      expect(channel.ack).not.toHaveBeenCalled();
+      expect(emit).not.toHaveBeenCalled();
+    });
+
+    it('logs but does not throw when publishing the compensated event fails', async () => {
+      const emit = jest
+        .fn()
+        .mockReturnValue(throwError(() => new Error('broker unreachable')));
+      const allotmentService = {
+        releaseSeat: jest.fn().mockResolvedValue({ released: true }),
+      } as unknown as FlightAllotmentService;
+      const controller = new FlightAllotmentController(
+        { emit } as never,
+        allotmentService,
+      );
+      const { channel, context } = buildContext();
+
+      await expect(
+        controller.handleCompensate(compensateMessage, context),
+      ).resolves.toBeUndefined();
+      expect(channel.ack).toHaveBeenCalledTimes(1);
+    });
   });
 });

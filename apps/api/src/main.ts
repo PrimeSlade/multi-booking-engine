@@ -49,6 +49,11 @@ async function bootstrap() {
     { queue: QUEUES.FRAUD, routingKey: QUEUES.FRAUD },
     { queue: QUEUES.FLIGHT_ALLOTMENT, routingKey: QUEUES.FLIGHT_ALLOTMENT },
     { queue: QUEUES.PAYMENT, routingKey: QUEUES.PAYMENT },
+    {
+      queue: QUEUES.FLIGHT_ALLOTMENT_COMPENSATE,
+      routingKey: QUEUES.FLIGHT_ALLOTMENT_COMPENSATE,
+    },
+    { queue: QUEUES.COMPENSATED, routingKey: ROUTING_PATTERNS.ALL_COMPENSATED },
   ];
 
   for (const { queue, routingKey } of rmqListeners) {

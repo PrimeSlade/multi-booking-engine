@@ -22,7 +22,10 @@ describe('StageAdvancementService', () => {
     };
   };
   let mockGraphService: { generate: jest.Mock };
-  let mockDispatchService: { dispatchSteps: jest.Mock };
+  let mockDispatchService: {
+    dispatchSteps: jest.Mock;
+    dispatchCompensations: jest.Mock;
+  };
   let service: StageAdvancementService;
 
   // The real type is the full Prisma-generated BookingStep row (inferred
@@ -57,9 +60,12 @@ describe('StageAdvancementService', () => {
         },
       },
     };
-    mockGraphService = { generate: jest.fn() };
+    mockGraphService = {
+      generate: jest.fn().mockReturnValue({ stages: [], steps: [] }),
+    };
     mockDispatchService = {
       dispatchSteps: jest.fn().mockResolvedValue(undefined),
+      dispatchCompensations: jest.fn().mockResolvedValue(undefined),
     };
     service = new StageAdvancementService(
       mockPrisma as never,
@@ -87,6 +93,7 @@ describe('StageAdvancementService', () => {
     });
     expect(bookingUpdate).toHaveBeenCalledWith({ status: 'failed' });
     expect(mockDispatchService.dispatchSteps).not.toHaveBeenCalled();
+    expect(mockDispatchService.dispatchCompensations).not.toHaveBeenCalled();
   });
 
   it('does not cancel again when the booking was already cancelled', async () => {
@@ -152,8 +159,11 @@ describe('StageAdvancementService', () => {
       status: 'failed',
       error: { code: 'BOOKING_CANCELLED', retryable: false },
     });
-    expect(mockGraphService.generate).not.toHaveBeenCalled();
+    // generate() IS called (compensateSuccessfulSteps looks up compensatable
+    // steps), but the default mock returns no compensatable steps, so
+    // nothing gets dispatched - either kind.
     expect(mockDispatchService.dispatchSteps).not.toHaveBeenCalled();
+    expect(mockDispatchService.dispatchCompensations).not.toHaveBeenCalled();
   });
 
   it('does nothing when the completed stage was the last one in the graph', async () => {
@@ -234,5 +244,127 @@ describe('StageAdvancementService', () => {
     await service.maybeAdvance(completedStep as never);
 
     expect(mockDispatchService.dispatchSteps).not.toHaveBeenCalled();
+  });
+
+  it('dispatches compensation for a compensatable success step after cancelling', async () => {
+    const pendingUpdateAll = jest.fn().mockResolvedValue([]);
+    const claimUpdate = jest.fn().mockResolvedValue({
+      id: 'step-allotment',
+      bookingId: 'booking-1',
+      stepName: 'flight.allotment',
+      scope: 'product',
+      agent: 'flight-agent',
+      flightBookingId: 'flight-booking-1',
+      hotelBookingId: null,
+    });
+    mockPrisma.db.orm.public.BookingStep.where
+      .mockReturnValueOnce(whereAll([{ ...completedStep, status: 'failed' }]))
+      .mockReturnValueOnce({ updateAll: pendingUpdateAll })
+      .mockReturnValueOnce(
+        whereAll([
+          {
+            id: 'step-allotment',
+            bookingId: 'booking-1',
+            stepName: 'flight.allotment',
+            scope: 'product',
+            agent: 'flight-agent',
+            flightBookingId: 'flight-booking-1',
+            hotelBookingId: null,
+            status: 'success',
+          },
+        ]),
+      )
+      .mockReturnValueOnce({ update: claimUpdate });
+    const bookingUpdate = jest.fn().mockResolvedValue({ id: 'booking-1' });
+    mockPrisma.db.orm.public.Booking.where.mockReturnValue({
+      update: bookingUpdate,
+    });
+    mockGraphService.generate.mockReturnValue({
+      stages: [],
+      steps: [
+        { stepName: 'flight.allotment', compensate: 'release_seat' },
+        { stepName: 'itinerary.fraud' },
+      ],
+    });
+
+    await service.maybeAdvance({ ...completedStep, status: 'failed' } as never);
+
+    expect(mockPrisma.db.orm.public.BookingStep.where).toHaveBeenNthCalledWith(
+      4,
+      { id: 'step-allotment', status: 'success' },
+    );
+    expect(claimUpdate).toHaveBeenCalledWith({ status: 'compensating' });
+    expect(mockDispatchService.dispatchCompensations).toHaveBeenCalledWith([
+      {
+        id: 'step-allotment',
+        bookingId: 'booking-1',
+        stepName: 'flight.allotment',
+        scope: 'product',
+        agent: 'flight-agent',
+        flightBookingId: 'flight-booking-1',
+        hotelBookingId: null,
+        status: 'success',
+      },
+    ]);
+  });
+
+  it('does not compensate a success step with no compensate action defined', async () => {
+    const pendingUpdateAll = jest.fn().mockResolvedValue([]);
+    mockPrisma.db.orm.public.BookingStep.where
+      .mockReturnValueOnce(whereAll([{ ...completedStep, status: 'failed' }]))
+      .mockReturnValueOnce({ updateAll: pendingUpdateAll })
+      .mockReturnValueOnce(
+        whereAll([
+          {
+            ...completedStep,
+            id: 'step-fraud',
+            stepName: 'itinerary.fraud',
+            status: 'success',
+          },
+        ]),
+      );
+    const bookingUpdate = jest.fn().mockResolvedValue({ id: 'booking-1' });
+    mockPrisma.db.orm.public.Booking.where.mockReturnValue({
+      update: bookingUpdate,
+    });
+    mockGraphService.generate.mockReturnValue({
+      stages: [],
+      steps: [{ stepName: 'flight.allotment', compensate: 'release_seat' }],
+    });
+
+    await service.maybeAdvance({ ...completedStep, status: 'failed' } as never);
+
+    expect(mockDispatchService.dispatchCompensations).not.toHaveBeenCalled();
+  });
+
+  it('does not dispatch compensation when the claim loses the race', async () => {
+    const pendingUpdateAll = jest.fn().mockResolvedValue([]);
+    const claimUpdate = jest.fn().mockResolvedValue(null);
+    mockPrisma.db.orm.public.BookingStep.where
+      .mockReturnValueOnce(whereAll([{ ...completedStep, status: 'failed' }]))
+      .mockReturnValueOnce({ updateAll: pendingUpdateAll })
+      .mockReturnValueOnce(
+        whereAll([
+          {
+            id: 'step-allotment',
+            bookingId: 'booking-1',
+            stepName: 'flight.allotment',
+            status: 'success',
+          },
+        ]),
+      )
+      .mockReturnValueOnce({ update: claimUpdate });
+    const bookingUpdate = jest.fn().mockResolvedValue({ id: 'booking-1' });
+    mockPrisma.db.orm.public.Booking.where.mockReturnValue({
+      update: bookingUpdate,
+    });
+    mockGraphService.generate.mockReturnValue({
+      stages: [],
+      steps: [{ stepName: 'flight.allotment', compensate: 'release_seat' }],
+    });
+
+    await service.maybeAdvance({ ...completedStep, status: 'failed' } as never);
+
+    expect(mockDispatchService.dispatchCompensations).not.toHaveBeenCalled();
   });
 });

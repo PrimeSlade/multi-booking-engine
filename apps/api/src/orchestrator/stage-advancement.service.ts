@@ -122,5 +122,66 @@ export class StageAdvancementService {
     });
 
     this.logger.warn(`Booking ${bookingId} cancelled: stage ${stage} failed`);
+
+    await this.compensateSuccessfulSteps(bookingId);
+  }
+
+  private async compensateSuccessfulSteps(bookingId: string): Promise<void> {
+    const [flightBookings, hotelBookings] = await Promise.all([
+      this.prisma.db.orm.public.FlightBooking.where({ bookingId })
+        .all()
+        .toArray(),
+      this.prisma.db.orm.public.HotelBooking.where({ bookingId })
+        .all()
+        .toArray(),
+    ]);
+    const products = [
+      ...(flightBookings.length ? ['flight'] : []),
+      ...(hotelBookings.length ? ['hotel'] : []),
+    ];
+    const graph = this.graphService.generate({ products });
+
+    // Generic on purpose: any success step whose graph entry declares a
+    // compensate action gets claimed and dispatched, not just
+    // flight.allotment. Known gap: hotel.allotment/itinerary.payment also
+    // declare one but have no consumer yet, so a step there would get stuck
+    // at 'compensating' forever (message silently unroutable, no bound
+    // queue). Not reachable today; accepted until those agents grow
+    // compensate handlers too.
+    const compensatable = new Set(
+      graph.steps.filter((s) => s.compensate).map((s) => s.stepName),
+    );
+    if (compensatable.size === 0) return;
+
+    const successSteps = await this.prisma.db.orm.public.BookingStep.where({
+      bookingId,
+      status: 'success',
+    })
+      .all()
+      .toArray();
+    const eligible = successSteps.filter((s: BookingStepRow) =>
+      compensatable.has(s.stepName),
+    );
+    if (eligible.length === 0) return;
+
+    // Per-row conditional claim (no bulk "id IN [...]" filter verified to
+    // exist on this ORM target - each claim targets a distinct id anyway, so
+    // a loop of single-row conditional updates is both simpler and provably
+    // supported, same idiom as applyCompletion's single-row claim).
+    const claims = await Promise.all(
+      eligible.map(async (row: BookingStepRow) => {
+        const updated = await this.prisma.db.orm.public.BookingStep.where({
+          id: row.id,
+          status: 'success',
+        }).update({ status: 'compensating' });
+        return updated ? row : null;
+      }),
+    );
+    const claimed = claims.filter(
+      (r: BookingStepRow | null): r is BookingStepRow => r !== null,
+    );
+    if (claimed.length === 0) return;
+
+    await this.dispatchService.dispatchCompensations(claimed);
   }
 }
