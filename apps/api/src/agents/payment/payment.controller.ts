@@ -9,8 +9,14 @@ import {
 import type { Channel, Message } from 'amqplib';
 import { firstValueFrom } from 'rxjs';
 import { BOOKING_RMQ_CLIENT, QUEUES } from '@/messaging/messaging.constants';
-import { BookingStepCompletionMessage } from '@/messaging/messaging.types';
-import { BookingStepDispatchMessage } from '@/dispatch/dispatch.types';
+import {
+  BookingStepCompensatedMessage,
+  BookingStepCompletionMessage,
+} from '@/messaging/messaging.types';
+import {
+  BookingStepCompensateMessage,
+  BookingStepDispatchMessage,
+} from '@/dispatch/dispatch.types';
 import { PaymentService } from '@/agents/payment/payment.service';
 
 @Controller()
@@ -82,6 +88,35 @@ export class PaymentController {
     } catch (err) {
       this.logger.error(
         `Failed to publish completion for stepId=${data.stepId}`,
+        err instanceof Error ? err.stack : String(err),
+      );
+    }
+  }
+
+  @EventPattern(QUEUES.PAYMENT_COMPENSATE)
+  async handleCompensate(
+    @Payload() data: BookingStepCompensateMessage,
+    @Ctx() context: RmqContext,
+  ) {
+    const channel = context.getChannelRef() as Channel;
+    const originalMsg = context.getMessage() as Message;
+
+    // Payment is simulated, so there is no external charge to reverse.
+    channel.ack(originalMsg);
+
+    const message: BookingStepCompensatedMessage = {
+      stepId: data.stepId,
+      bookingId: data.bookingId,
+      stepName: data.stepName,
+    };
+
+    try {
+      await firstValueFrom(
+        this.client.emit(`booking.step.compensated.${data.stepName}`, message),
+      );
+    } catch (err) {
+      this.logger.error(
+        `Failed to publish compensated event for stepId=${data.stepId}`,
         err instanceof Error ? err.stack : String(err),
       );
     }

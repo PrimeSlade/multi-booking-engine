@@ -31,6 +31,7 @@ export const QUEUES = {
 
   // Compensation (saga rollback)
   FLIGHT_ALLOTMENT_COMPENSATE: 'booking.step.compensate.flight.allotment',
+  PAYMENT_COMPENSATE: 'booking.step.compensate.itinerary.payment',
   COMPENSATED: 'booking.step.compensated',
 } as const;
 
@@ -57,4 +58,5 @@ export const COMPLETION_ROUTING_KEYS = {
 // reason.
 export const COMPENSATED_ROUTING_KEYS = {
   FLIGHT_ALLOTMENT: 'booking.step.compensated.flight.allotment',
+  PAYMENT: 'booking.step.compensated.itinerary.payment',
 } as const;

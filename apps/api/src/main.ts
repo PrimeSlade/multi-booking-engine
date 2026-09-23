@@ -53,6 +53,10 @@ async function bootstrap() {
       queue: QUEUES.FLIGHT_ALLOTMENT_COMPENSATE,
       routingKey: QUEUES.FLIGHT_ALLOTMENT_COMPENSATE,
     },
+    {
+      queue: QUEUES.PAYMENT_COMPENSATE,
+      routingKey: QUEUES.PAYMENT_COMPENSATE,
+    },
     { queue: QUEUES.COMPENSATED, routingKey: ROUTING_PATTERNS.ALL_COMPENSATED },
   ];
 

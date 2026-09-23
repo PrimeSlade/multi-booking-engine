@@ -6,7 +6,10 @@ import { of, throwError } from 'rxjs';
 import type { RmqContext } from '@nestjs/microservices';
 import { PaymentController } from './payment.controller';
 import { PaymentService } from './payment.service';
-import { BookingStepDispatchMessage } from '@/dispatch/dispatch.types';
+import {
+  BookingStepCompensateMessage,
+  BookingStepDispatchMessage,
+} from '@/dispatch/dispatch.types';
 
 describe('PaymentController', () => {
   const baseMessage: BookingStepDispatchMessage = {
@@ -20,6 +23,16 @@ describe('PaymentController', () => {
     attempt: 0,
     timeoutMs: 10000,
     retry: { max: 2, backoffMs: 2000 },
+  };
+
+  const compensateMessage: BookingStepCompensateMessage = {
+    stepId: 'step-1',
+    bookingId: 'booking-1',
+    stepName: 'itinerary.payment',
+    scope: 'itinerary',
+    agent: 'payment-agent',
+    flightBookingId: null,
+    hotelBookingId: null,
   };
 
   const buildContext = () => {
@@ -111,5 +124,46 @@ describe('PaymentController', () => {
       controller.handle(baseMessage, context),
     ).resolves.toBeUndefined();
     expect(channel.ack).toHaveBeenCalledTimes(1);
+  });
+
+  it('acks and publishes a compensated event for the fake refund', async () => {
+    const emit = jest.fn().mockReturnValue(of(undefined));
+    const processPayment = jest.fn();
+    const paymentService = {
+      processPayment,
+    } as unknown as PaymentService;
+    const controller = new PaymentController({ emit } as never, paymentService);
+    const { channel, context } = buildContext();
+
+    await controller.handleCompensate(compensateMessage, context);
+
+    expect(channel.ack).toHaveBeenCalledTimes(1);
+    expect(channel.nack).not.toHaveBeenCalled();
+    expect(processPayment).not.toHaveBeenCalled();
+    expect(emit).toHaveBeenCalledWith(
+      'booking.step.compensated.itinerary.payment',
+      {
+        stepId: 'step-1',
+        bookingId: 'booking-1',
+        stepName: 'itinerary.payment',
+      },
+    );
+  });
+
+  it('logs but does not throw when publishing the compensated event fails', async () => {
+    const emit = jest
+      .fn()
+      .mockReturnValue(throwError(() => new Error('broker unreachable')));
+    const paymentService = {
+      processPayment: jest.fn(),
+    } as unknown as PaymentService;
+    const controller = new PaymentController({ emit } as never, paymentService);
+    const { channel, context } = buildContext();
+
+    await expect(
+      controller.handleCompensate(compensateMessage, context),
+    ).resolves.toBeUndefined();
+    expect(channel.ack).toHaveBeenCalledTimes(1);
+    expect(channel.nack).not.toHaveBeenCalled();
   });
 });
