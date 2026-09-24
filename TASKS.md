@@ -1,30 +1,29 @@
-# Next up
+# Remaining work
 
-## Build the completion consumer (orchestrator)
+## Finish the main booking features
 
-Branch: `feat/rabbitmq-agent`. Two increments already done and verified on this branch:
+- Build the hotel availability agent and publish its completion events.
+- Build the hotel allotment agent, including `release_room` compensation.
+- Implement the stage-2 `all_or_ask` partial-failure flow, including `awaiting_user_decision` and `decisionExpiresAt`.
+- Implement explicit user approval and rejection handling plus the decision-timeout path.
 
-1. **Producer**: `StepDispatchService` (`apps/api/src/dispatch/`) publishes stage-0 `BookingStep`s to the `booking.topic` exchange when a booking is created.
-2. **First consumer**: `FlightAvailabilityController`/`Service` (`apps/api/src/agents/flight-availability/`) consumes `flight.availability`, does a real catalog check, acks, and publishes a completion reply to `booking.step.completed.<stepName>`.
+## Deferred: compensation reliability, retries, and recovery
 
-### The gap
+Complete the remaining main booking features before starting this increment. The current compensation flow can leave a `BookingStep` stuck in `compensating` when dispatching the compensation command fails, the agent acknowledges the command before publishing its `compensated` event, or the event never reaches the orchestrator.
 
-Nothing reads from `booking.step.completed` yet. Confirmed live: a completion message lands there correctly (proving the binding fix in `main.ts` works), and then NestJS's own `ServerRMQ` code nacks it and logs `An unsupported event was received...` because no `@EventPattern` handler exists for it. The `BookingStep` row in the DB stays `pending` forever, even after a real completion already happened.
+### Required reliability work
 
-### What the orchestrator needs to do
+- Make every compensation operation idempotent by `stepId`; redelivery must not release the same seat, room, or payment more than once.
+- Publish the `booking.step.compensated.<stepName>` result successfully before acknowledging the compensation command.
+- Add bounded RabbitMQ retry queues with backoff for failed compensation commands and result publication.
+- Route exhausted retries to an asserted DLX/DLQ with an observable consumer or inspection path.
+- Add a watchdog for `BookingStep` rows that remain `compensating` past their configured timeout, then safely redispatch them.
+- Consider a transactional outbox for atomic database state changes and outbound compensation events.
 
-- `@EventPattern` handler(s) on the `booking.step.completed` queue (bound via `ROUTING_PATTERNS.ALL_COMPLETED = 'booking.step.completed.#'` already, in `main.ts`).
-- On receiving a `BookingStepCompletionMessage` (`apps/api/src/messaging/messaging.types.ts`): update the matching `BookingStep` row's `status`/`result`/`error` (look it up by `stepId`).
-- Decide whether the *stage* is done: does it need to wait for all steps in that `stage` to report back before deciding what's next? (Stage 0 today only has `flight.availability` wired up; `hotel.availability` dispatches into the void since it has no agent yet - decide whether to build `hotel-agent` first, or handle "some steps in a stage never report" as part of this.)
-- Apply the stage's `policy`/`join` from the graph (`booking-graph.yml`): stage 2 has `join: all_or_ask` - on partial failure there, `onPartialFailure: awaiting_user_decision` (maps to `Booking.decisionExpiresAt`, `decisionTtlMs: 900000`).
-- On success of a stage, dispatch the next stage's steps (this is where `StepDispatchService` might need a more general method than `dispatchStage0`, or a stage-aware variant).
-- Compensation is a separate concern layered on top of this (steps have a `compensate` action in the graph, e.g. `release_seat`) - probably its own increment after basic stage advancement works.
+### Test coverage
 
-### Known gaps to keep in mind (already flagged, not blockers)
-
-- `booking.dlx` is never actually asserted as a real exchange - a nack with no consumer silently drops the message. Not fixed yet.
-- Publish-after-ack in the agent has a small window where a crash could lose a completion silently (no orchestrator existed to care until now - might be worth revisiting once one does).
-
-### Suggested approach
-
-Same as the last two increments: go through plan mode first (Explore -> Plan -> confirm scope with me before writing code) since this one has real design decisions (stage advancement, join/barrier logic) rather than just wiring.
+- Compensation succeeds but publishing its result fails.
+- A consumer crashes after publishing the result but before acknowledging the command.
+- RabbitMQ redelivers a compensation command and the domain action remains idempotent.
+- Retry limits and backoff are enforced, then exhausted messages reach the DLQ.
+- The watchdog recovers a stale `compensating` step without duplicating the compensation action.

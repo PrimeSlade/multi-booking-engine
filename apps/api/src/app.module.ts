@@ -6,6 +6,7 @@ import { FlightAvailabilityModule } from '@/agents/flight-availability/flight-av
 import { FraudModule } from '@/agents/fraud/fraud.module';
 import { FlightAllotmentModule } from '@/agents/flight-allotment/flight-allotment.module';
 import { PaymentModule } from '@/agents/payment/payment.module';
+import { NotifyModule } from '@/agents/notify/notify.module';
 import { BookingModule } from '@/booking/booking.module';
 import { CatalogModule } from '@/catalog/catalog.module';
 import { MessagingModule } from '@/messaging/messaging.module';
@@ -29,6 +30,7 @@ import { GraphModule } from '@/graph/graph.module';
     FraudModule,
     FlightAllotmentModule,
     PaymentModule,
+    NotifyModule,
     OrchestratorModule,
   ],
   controllers: [AppController],

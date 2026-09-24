@@ -68,10 +68,16 @@ export class StageAdvancementService {
     const currentIndex = graph.stages.findIndex((s) => s.stage === step.stage);
     const nextStageDef = graph.stages[currentIndex + 1];
     if (!nextStageDef) {
-      this.logger.log(
-        `Booking ${step.bookingId} completed its final stage (${step.stage})`,
-      );
-      return; // marking Booking.status confirmed is a later increment
+      const confirmed = await this.prisma.db.orm.public.Booking.where({
+        id: step.bookingId,
+        status: 'in_progress',
+      }).update({ status: 'confirmed' });
+      if (confirmed) {
+        this.logger.log(
+          `Booking ${step.bookingId} confirmed after final stage ${step.stage}`,
+        );
+      }
+      return;
     }
 
     // Conditional bulk update doubles as a claim: if two sibling completions
@@ -143,11 +149,10 @@ export class StageAdvancementService {
 
     // Generic on purpose: any success step whose graph entry declares a
     // compensate action gets claimed and dispatched, not just
-    // flight.allotment. Known gap: hotel.allotment/itinerary.payment also
-    // declare one but have no consumer yet, so a step there would get stuck
-    // at 'compensating' forever (message silently unroutable, no bound
-    // queue). Not reachable today; accepted until those agents grow
-    // compensate handlers too.
+    // flight.allotment. Known gap: hotel.allotment declares one but has no
+    // consumer yet, so a step there would get stuck at 'compensating'
+    // forever. Not reachable today; accepted until the hotel agent grows a
+    // compensate handler too.
     const compensatable = new Set(
       graph.steps.filter((s) => s.compensate).map((s) => s.stepName),
     );

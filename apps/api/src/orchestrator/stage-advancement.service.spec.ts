@@ -166,7 +166,7 @@ describe('StageAdvancementService', () => {
     expect(mockDispatchService.dispatchCompensations).not.toHaveBeenCalled();
   });
 
-  it('does nothing when the completed stage was the last one in the graph', async () => {
+  it('confirms the booking when the completed stage was the last one', async () => {
     mockPrisma.db.orm.public.BookingStep.where.mockReturnValueOnce(
       whereAll([{ ...completedStep, status: 'success' }]),
     );
@@ -176,9 +176,36 @@ describe('StageAdvancementService', () => {
     mockGraphService.generate.mockReturnValue({
       stages: [{ stage: 0, policy: 'parallel', steps: [] }],
     });
+    const bookingUpdate = jest.fn().mockResolvedValue({ id: 'booking-1' });
+    mockPrisma.db.orm.public.Booking.where.mockReturnValue({
+      update: bookingUpdate,
+    });
 
     await service.maybeAdvance(completedStep as never);
 
+    expect(mockPrisma.db.orm.public.Booking.where).toHaveBeenCalledWith({
+      id: 'booking-1',
+      status: 'in_progress',
+    });
+    expect(bookingUpdate).toHaveBeenCalledWith({ status: 'confirmed' });
+    expect(mockDispatchService.dispatchSteps).not.toHaveBeenCalled();
+  });
+
+  it('does not overwrite a booking that already left in_progress', async () => {
+    mockPrisma.db.orm.public.BookingStep.where.mockReturnValueOnce(
+      whereAll([{ ...completedStep, status: 'success' }]),
+    );
+    mockGraphService.generate.mockReturnValue({
+      stages: [{ stage: 0, policy: 'parallel', steps: [] }],
+    });
+    const bookingUpdate = jest.fn().mockResolvedValue(null);
+    mockPrisma.db.orm.public.Booking.where.mockReturnValue({
+      update: bookingUpdate,
+    });
+
+    await service.maybeAdvance(completedStep as never);
+
+    expect(bookingUpdate).toHaveBeenCalledWith({ status: 'confirmed' });
     expect(mockDispatchService.dispatchSteps).not.toHaveBeenCalled();
   });
 

@@ -50,6 +50,7 @@ export const COMPLETION_ROUTING_KEYS = {
   FRAUD: 'booking.step.completed.itinerary.fraud',
   FLIGHT_ALLOTMENT: 'booking.step.completed.flight.allotment',
   PAYMENT: 'booking.step.completed.itinerary.payment',
+  NOTIFY: 'booking.step.completed.itinerary.notify',
 } as const;
 
 // Same idea as COMPLETION_ROUTING_KEYS, but for "I finished undoing this
