@@ -235,7 +235,7 @@ async function main() {
             hotelId,
             roomType,
             price: String(randomInt(100, 800)),
-            available: true,
+            roomsLeft: 10,
           });
         } catch (e) {
           // Ignore duplicate errors

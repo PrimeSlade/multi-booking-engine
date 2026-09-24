@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 
 export type HotelAvailabilityOutcome =
-  { available: true; roomId: string; roomType: string } | { available: false };
+  | {
+      available: true;
+      roomId: string;
+      roomType: string;
+      roomsLeft: number;
+    }
+  | { available: false };
 
 @Injectable()
 export class HotelAvailabilityService {
@@ -29,7 +35,11 @@ export class HotelAvailabilityService {
     })
       .all()
       .first();
-    if (!room || room.hotelId !== hotelBooking.hotelId || !room.available) {
+    if (
+      !room ||
+      room.hotelId !== hotelBooking.hotelId ||
+      room.roomsLeft < hotelBooking.rooms
+    ) {
       return { available: false };
     }
 
@@ -37,6 +47,7 @@ export class HotelAvailabilityService {
       available: true,
       roomId: room.id,
       roomType: room.roomType,
+      roomsLeft: room.roomsLeft,
     };
   }
 }

@@ -954,13 +954,6 @@
           },
           "Room": {
             "fields": {
-              "available": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/bool@1",
-                  "kind": "scalar"
-                }
-              },
               "hotelId": {
                 "nullable": false,
                 "type": {
@@ -988,6 +981,13 @@
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
+              },
+              "roomsLeft": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
               }
             },
             "relations": {
@@ -1009,9 +1009,6 @@
             },
             "storage": {
               "fields": {
-                "available": {
-                  "column": "available"
-                },
                 "hotelId": {
                   "column": "hotel_id"
                 },
@@ -1023,6 +1020,9 @@
                 },
                 "roomType": {
                   "column": "room_type"
+                },
+                "roomsLeft": {
+                  "column": "rooms_left"
                 }
               },
               "namespaceId": "public",
@@ -1631,15 +1631,6 @@
             },
             "room": {
               "columns": {
-                "available": {
-                  "codecId": "pg/bool@1",
-                  "default": {
-                    "kind": "literal",
-                    "value": true
-                  },
-                  "nativeType": "bool",
-                  "nullable": false
-                },
                 "hotel_id": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -1658,6 +1649,15 @@
                 "room_type": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
+                  "nullable": false
+                },
+                "rooms_left": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 10
+                  },
+                  "nativeType": "int4",
                   "nullable": false
                 }
               },
@@ -1732,7 +1732,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "a616477d2bfa7cc4f32bedcfd728aa4161e51ac5c610ffe603cfc27ac4aa7a2f"
+    "storageHash": "0432943f75a24abc37c443768fcbd997fc5b4bdd2d2c5ce0f54e7369d292e076"
   },
   "execution": {
     "executionHash": "efbc1e60f192c8645e4a372146a84c7f56e02402c3446adae30e1f940443f322",

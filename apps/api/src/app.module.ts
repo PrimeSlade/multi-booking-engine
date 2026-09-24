@@ -8,6 +8,7 @@ import { FlightAllotmentModule } from '@/agents/flight-allotment/flight-allotmen
 import { PaymentModule } from '@/agents/payment/payment.module';
 import { NotifyModule } from '@/agents/notify/notify.module';
 import { HotelAvailabilityModule } from '@/agents/hotel-availability/hotel-availability.module';
+import { HotelAllotmentModule } from '@/agents/hotel-allotment/hotel-allotment.module';
 import { BookingModule } from '@/booking/booking.module';
 import { CatalogModule } from '@/catalog/catalog.module';
 import { MessagingModule } from '@/messaging/messaging.module';
@@ -31,6 +32,7 @@ import { GraphModule } from '@/graph/graph.module';
     HotelAvailabilityModule,
     FraudModule,
     FlightAllotmentModule,
+    HotelAllotmentModule,
     PaymentModule,
     NotifyModule,
     OrchestratorModule,

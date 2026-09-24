@@ -148,11 +148,7 @@ export class StageAdvancementService {
     const graph = this.graphService.generate({ products });
 
     // Generic on purpose: any success step whose graph entry declares a
-    // compensate action gets claimed and dispatched, not just
-    // flight.allotment. Known gap: hotel.allotment declares one but has no
-    // consumer yet, so a step there would get stuck at 'compensating'
-    // forever. Not reachable today; accepted until the hotel agent grows a
-    // compensate handler too.
+    // compensate action gets claimed and dispatched.
     const compensatable = new Set(
       graph.steps.filter((s) => s.compensate).map((s) => s.stepName),
     );

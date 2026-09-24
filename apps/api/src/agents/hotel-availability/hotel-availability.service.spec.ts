@@ -43,6 +43,7 @@ describe('HotelAvailabilityService', () => {
         id: 'hotel-booking-1',
         hotelId: 'hotel-1',
         roomId: 'hotel-1-deluxe',
+        rooms: 2,
       }),
     );
     mockPrisma.db.orm.public.Room.where.mockReturnValue(
@@ -50,7 +51,7 @@ describe('HotelAvailabilityService', () => {
         id: 'hotel-1-deluxe',
         hotelId: 'hotel-1',
         roomType: 'Deluxe',
-        available: true,
+        roomsLeft: 5,
       }),
     );
 
@@ -60,6 +61,7 @@ describe('HotelAvailabilityService', () => {
       available: true,
       roomId: 'hotel-1-deluxe',
       roomType: 'Deluxe',
+      roomsLeft: 5,
     });
   });
 
@@ -69,6 +71,7 @@ describe('HotelAvailabilityService', () => {
         id: 'hotel-booking-1',
         hotelId: 'hotel-1',
         roomId: 'hotel-1-deluxe',
+        rooms: 2,
       }),
     );
     mockPrisma.db.orm.public.Room.where.mockReturnValue(
@@ -76,7 +79,7 @@ describe('HotelAvailabilityService', () => {
         id: 'hotel-1-deluxe',
         hotelId: 'hotel-1',
         roomType: 'Deluxe',
-        available: false,
+        roomsLeft: 1,
       }),
     );
 
@@ -91,6 +94,7 @@ describe('HotelAvailabilityService', () => {
         id: 'hotel-booking-1',
         hotelId: 'hotel-1',
         roomId: 'hotel-2-deluxe',
+        rooms: 1,
       }),
     );
     mockPrisma.db.orm.public.Room.where.mockReturnValue(
@@ -98,7 +102,7 @@ describe('HotelAvailabilityService', () => {
         id: 'hotel-2-deluxe',
         hotelId: 'hotel-2',
         roomType: 'Deluxe',
-        available: true,
+        roomsLeft: 5,
       }),
     );
 

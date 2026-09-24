@@ -2,7 +2,6 @@
 
 ## Finish the main booking features
 
-- Build the hotel allotment agent, including `release_room` compensation.
 - Implement the stage-2 `all_or_ask` partial-failure flow, including `awaiting_user_decision` and `decisionExpiresAt`.
 - Implement explicit user approval and rejection handling plus the decision-timeout path.
 

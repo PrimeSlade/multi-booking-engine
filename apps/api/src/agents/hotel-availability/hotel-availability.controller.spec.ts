@@ -38,6 +38,7 @@ describe('HotelAvailabilityController', () => {
         available: true,
         roomId: 'hotel-1-deluxe',
         roomType: 'Deluxe',
+        roomsLeft: 5,
       }),
     } as unknown as HotelAvailabilityService;
     const controller = new HotelAvailabilityController(
@@ -65,6 +66,7 @@ describe('HotelAvailabilityController', () => {
         result: {
           roomId: 'hotel-1-deluxe',
           roomType: 'Deluxe',
+          roomsLeft: 5,
         },
         error: null,
       },
@@ -122,6 +124,7 @@ describe('HotelAvailabilityController', () => {
         available: true,
         roomId: 'hotel-1-deluxe',
         roomType: 'Deluxe',
+        roomsLeft: 5,
       }),
     } as unknown as HotelAvailabilityService;
     const controller = new HotelAvailabilityController(

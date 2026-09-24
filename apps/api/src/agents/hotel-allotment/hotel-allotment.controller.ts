@@ -8,21 +8,27 @@ import {
 } from '@nestjs/microservices';
 import type { Channel, Message } from 'amqplib';
 import { firstValueFrom } from 'rxjs';
-import { HotelAvailabilityService } from '@/agents/hotel-availability/hotel-availability.service';
-import { BookingStepDispatchMessage } from '@/dispatch/dispatch.types';
+import { HotelAllotmentService } from '@/agents/hotel-allotment/hotel-allotment.service';
+import {
+  BookingStepCompensateMessage,
+  BookingStepDispatchMessage,
+} from '@/dispatch/dispatch.types';
 import { BOOKING_RMQ_CLIENT, QUEUES } from '@/messaging/messaging.constants';
-import { BookingStepCompletionMessage } from '@/messaging/messaging.types';
+import {
+  BookingStepCompensatedMessage,
+  BookingStepCompletionMessage,
+} from '@/messaging/messaging.types';
 
 @Controller()
-export class HotelAvailabilityController {
-  private readonly logger = new Logger(HotelAvailabilityController.name);
+export class HotelAllotmentController {
+  private readonly logger = new Logger(HotelAllotmentController.name);
 
   constructor(
     @Inject(BOOKING_RMQ_CLIENT) private readonly client: ClientProxy,
-    private readonly availabilityService: HotelAvailabilityService,
+    private readonly allotmentService: HotelAllotmentService,
   ) {}
 
-  @EventPattern(QUEUES.HOTEL_AVAILABILITY)
+  @EventPattern(QUEUES.HOTEL_ALLOTMENT)
   async handle(
     @Payload() data: BookingStepDispatchMessage,
     @Ctx() context: RmqContext,
@@ -32,11 +38,10 @@ export class HotelAvailabilityController {
 
     let completion: BookingStepCompletionMessage;
     try {
-      const outcome = await this.availabilityService.checkAvailability(
+      const outcome = await this.allotmentService.reserveRoom(
         data.hotelBookingId,
       );
-
-      completion = outcome.available
+      completion = outcome.reserved
         ? {
             stepId: data.stepId,
             bookingId: data.bookingId,
@@ -47,11 +52,7 @@ export class HotelAvailabilityController {
             hotelBookingId: data.hotelBookingId,
             attempt: data.attempt,
             status: 'success',
-            result: {
-              roomId: outcome.roomId,
-              roomType: outcome.roomType,
-              roomsLeft: outcome.roomsLeft,
-            },
+            result: { roomsLeft: outcome.roomsLeft },
             error: null,
           }
         : {
@@ -64,13 +65,12 @@ export class HotelAvailabilityController {
             hotelBookingId: data.hotelBookingId,
             attempt: data.attempt,
             status: 'failed',
-            error: { code: 'NO_AVAILABILITY', retryable: false },
+            error: { code: 'ROOM_UNAVAILABLE', retryable: false },
           };
-
       channel.ack(originalMsg);
     } catch (err) {
       this.logger.error(
-        `hotel.availability check failed for stepId=${data.stepId}`,
+        `hotel.allotment failed for stepId=${data.stepId}`,
         err instanceof Error ? err.stack : String(err),
       );
       channel.nack(originalMsg, false, false);
@@ -84,6 +84,43 @@ export class HotelAvailabilityController {
     } catch (err) {
       this.logger.error(
         `Failed to publish completion for stepId=${data.stepId}`,
+        err instanceof Error ? err.stack : String(err),
+      );
+    }
+  }
+
+  @EventPattern(QUEUES.HOTEL_ALLOTMENT_COMPENSATE)
+  async handleCompensate(
+    @Payload() data: BookingStepCompensateMessage,
+    @Ctx() context: RmqContext,
+  ) {
+    const channel = context.getChannelRef() as Channel;
+    const originalMsg = context.getMessage() as Message;
+
+    try {
+      await this.allotmentService.releaseRoom(data.hotelBookingId);
+      channel.ack(originalMsg);
+    } catch (err) {
+      this.logger.error(
+        `hotel.allotment compensation failed for stepId=${data.stepId}`,
+        err instanceof Error ? err.stack : String(err),
+      );
+      channel.nack(originalMsg, false, false);
+      return;
+    }
+
+    const message: BookingStepCompensatedMessage = {
+      stepId: data.stepId,
+      bookingId: data.bookingId,
+      stepName: data.stepName,
+    };
+    try {
+      await firstValueFrom(
+        this.client.emit(`booking.step.compensated.${data.stepName}`, message),
+      );
+    } catch (err) {
+      this.logger.error(
+        `Failed to publish compensated event for stepId=${data.stepId}`,
         err instanceof Error ? err.stack : String(err),
       );
     }

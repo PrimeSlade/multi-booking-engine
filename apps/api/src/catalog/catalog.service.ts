@@ -13,7 +13,7 @@ export class CatalogService {
 
   async findAvailableHotels() {
     return this.prisma.db.orm.public.Hotel.include('rooms', (rooms) =>
-      rooms.where((r) => r.available.eq(true)),
+      rooms.where((r) => r.roomsLeft.gt(0)),
     ).all();
   }
 }

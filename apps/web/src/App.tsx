@@ -152,7 +152,10 @@ export function App() {
       if (current.some((r) => r.roomId === roomId)) {
         return current.filter((r) => r.roomId !== roomId);
       }
-      return [...current, { hotelId, roomId, checkIn: '', checkOut: '' }];
+      return [
+        ...current,
+        { hotelId, roomId, checkIn: '', checkOut: '', rooms: 1 },
+      ];
     });
   };
 
@@ -191,7 +194,7 @@ export function App() {
         city: hotel.city,
         checkIn: new Date(selection.checkIn).toISOString(),
         checkOut: new Date(selection.checkOut).toISOString(),
-        rooms: 1,
+        rooms: selection.rooms,
       });
     }
 

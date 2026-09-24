@@ -1,0 +1,118 @@
+[
+  {
+    "id": "column.public.room.rooms_left",
+    "label": "Add column \"rooms_left\" to \"room\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "rooms_left",
+        "table": "room"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"rooms_left\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "room",
+          "rooms_left"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"rooms_left\"",
+        "sql": "ALTER TABLE \"public\".\"room\" ADD COLUMN \"rooms_left\" int4 DEFAULT 10 NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"rooms_left\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "room",
+          "rooms_left"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data.room.rooms_left",
+    "label": "Backfill room inventory from availability",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "rooms_left",
+        "table": "room"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure room inventory columns exist",
+        "sql": "SELECT (COUNT(*) = 2) AS \"result\" FROM \"information_schema\".\"columns\" WHERE \"table_schema\" = 'public' AND \"table_name\" = 'room' AND \"column_name\" IN ('available', 'rooms_left')"
+      }
+    ],
+    "execute": [
+      {
+        "description": "map available rooms to 10 and unavailable rooms to 0",
+        "sql": "UPDATE \"public\".\"room\" SET \"rooms_left\" = CASE WHEN \"available\" THEN 10 ELSE 0 END"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify room inventory matches prior availability",
+        "sql": "SELECT NOT EXISTS (SELECT 1 FROM \"public\".\"room\" WHERE (\"available\" AND \"rooms_left\" <> 10) OR (NOT \"available\" AND \"rooms_left\" <> 0)) AS \"result\""
+      }
+    ]
+  },
+  {
+    "id": "dropColumn.room.available",
+    "label": "Drop column \"available\" from \"room\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "available",
+        "table": "room"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"available\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "room",
+          "available"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"available\"",
+        "sql": "ALTER TABLE \"public\".\"room\" DROP COLUMN \"available\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"available\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "room",
+          "available"
+        ]
+      }
+    ]
+  }
+]

@@ -31,6 +31,7 @@ export const QUEUES = {
 
   // Compensation (saga rollback)
   FLIGHT_ALLOTMENT_COMPENSATE: 'booking.step.compensate.flight.allotment',
+  HOTEL_ALLOTMENT_COMPENSATE: 'booking.step.compensate.hotel.allotment',
   PAYMENT_COMPENSATE: 'booking.step.compensate.itinerary.payment',
   COMPENSATED: 'booking.step.compensated',
 } as const;
@@ -50,6 +51,7 @@ export const COMPLETION_ROUTING_KEYS = {
   HOTEL_AVAILABILITY: 'booking.step.completed.hotel.availability',
   FRAUD: 'booking.step.completed.itinerary.fraud',
   FLIGHT_ALLOTMENT: 'booking.step.completed.flight.allotment',
+  HOTEL_ALLOTMENT: 'booking.step.completed.hotel.allotment',
   PAYMENT: 'booking.step.completed.itinerary.payment',
   NOTIFY: 'booking.step.completed.itinerary.notify',
 } as const;
@@ -60,5 +62,6 @@ export const COMPLETION_ROUTING_KEYS = {
 // reason.
 export const COMPENSATED_ROUTING_KEYS = {
   FLIGHT_ALLOTMENT: 'booking.step.compensated.flight.allotment',
+  HOTEL_ALLOTMENT: 'booking.step.compensated.hotel.allotment',
   PAYMENT: 'booking.step.compensated.itinerary.payment',
 } as const;

@@ -132,9 +132,9 @@ model Room {
   hotelId String @map("hotel_id")
   hotel   Hotel  @relation(fields: [hotelId], references: [id])
 
-  roomType  String  @map("room_type")
-  price     Decimal
-  available Boolean @default(true)
+  roomType String  @map("room_type")
+  price    Decimal
+  roomsLeft Int    @default(10) @map("rooms_left")
 
   @@index([hotelId])
   @@map("room")

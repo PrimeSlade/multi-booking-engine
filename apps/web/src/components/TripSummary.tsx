@@ -15,10 +15,12 @@ function Stepper({
   value,
   onChange,
   min = 1,
+  max,
 }: {
   value: number;
   onChange: (value: number) => void;
   min?: number;
+  max?: number;
 }) {
   return (
     <div className="flex items-center gap-2">
@@ -36,7 +38,10 @@ function Stepper({
         type="button"
         size="sm"
         variant="outline"
-        onClick={() => onChange(value + 1)}
+        disabled={max !== undefined && value >= max}
+        onClick={() =>
+          onChange(max === undefined ? value + 1 : Math.min(max, value + 1))
+        }
       >
         <Plus />
       </Button>
@@ -76,7 +81,7 @@ export function TripSummary({
   const flightTotal = flight ? Number(flight.price) * passengers : 0;
   const hotelTotal = rooms.reduce((sum, { room, selection }) => {
     const nights = diffNights(selection.checkIn, selection.checkOut);
-    return sum + Number(room.price) * nights;
+    return sum + Number(room.price) * nights * selection.rooms;
   }, 0);
   const total = flightTotal + hotelTotal;
 
@@ -84,9 +89,14 @@ export function TripSummary({
     (r) => !r.selection.checkIn || !r.selection.checkOut,
   );
   const missingDetails = !fullName.trim() || !email.trim();
+  const invalidRoomQuantity = rooms.some(
+    ({ room, selection }) =>
+      selection.rooms < 1 || selection.rooms > room.roomsLeft,
+  );
   const disabled =
     missingDates ||
     missingDetails ||
+    invalidRoomQuantity ||
     bookingState.status === 'loading' ||
     (!flight && rooms.length === 0);
 
@@ -142,11 +152,26 @@ export function TripSummary({
                   <p className="text-xs text-muted-foreground">
                     {hotel.city} · {nights} night{nights > 1 ? 's' : ''}
                   </p>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Rooms</span>
+                    <Stepper
+                      value={selection.rooms}
+                      max={room.roomsLeft}
+                      onChange={(value) =>
+                        onUpdateRoom(room.id, { rooms: value })
+                      }
+                    />
+                    <span className="text-xs text-muted-foreground">
+                      {room.roomsLeft} available
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <p className="font-medium">
-                  {formatCurrency(Number(room.price) * nights)}
+                  {formatCurrency(
+                    Number(room.price) * nights * selection.rooms,
+                  )}
                 </p>
                 <button
                   type="button"
