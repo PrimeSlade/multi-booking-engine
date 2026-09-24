@@ -13,9 +13,11 @@ import {
   fetchAvailableFlights,
   fetchAvailableHotels,
   fetchBooking,
+  submitBookingDecision,
 } from '@/lib/api/client';
 import type {
   Booking,
+  BookingDecision,
   Flight,
   FlightProduct,
   Hotel,
@@ -221,6 +223,13 @@ export function App() {
     setPassengers(1);
   };
 
+  const handleBookingDecision = async (decision: BookingDecision) => {
+    if (!confirmedBooking) return;
+    await submitBookingDecision(confirmedBooking.id, decision);
+    const fresh = await fetchBooking(confirmedBooking.id);
+    setConfirmedBooking(fresh);
+  };
+
   return (
     <main className="mx-auto min-h-screen max-w-5xl px-4 py-10">
       <div className="mb-8 text-center">
@@ -303,7 +312,7 @@ export function App() {
           )}
         </div>
 
-        <div className="md:sticky md:top-10 md:self-start">
+        <div className="min-w-0 md:sticky md:top-10 md:self-start">
           <Card>
             <CardHeader>
               <CardTitle>
@@ -314,6 +323,7 @@ export function App() {
               {confirmedBooking ? (
                 <BookingConfirmation
                   booking={confirmedBooking}
+                  onDecision={handleBookingDecision}
                   onReset={handleReset}
                 />
               ) : selectedFlight || roomEntries.length > 0 ? (

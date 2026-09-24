@@ -2,6 +2,7 @@ import axios, { type AxiosInstance } from 'axios';
 import type {
   ApiResponse,
   Booking,
+  BookingDecision,
   CreateBookingPayload,
   Flight,
   Hotel,
@@ -42,4 +43,8 @@ export function createBooking(payload: CreateBookingPayload) {
 
 export function fetchBooking(id: string) {
   return unwrap<Booking>(http.get(`/bookings/${id}`));
+}
+
+export function submitBookingDecision(id: string, decision: BookingDecision) {
+  return unwrap<Booking>(http.post(`/bookings/${id}/decision`, { decision }));
 }

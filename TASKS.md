@@ -1,13 +1,8 @@
 # Remaining work
 
-## Finish the main booking features
-
-- Implement the stage-2 `all_or_ask` partial-failure flow, including `awaiting_user_decision` and `decisionExpiresAt`.
-- Implement explicit user approval and rejection handling plus the decision-timeout path.
-
 ## Deferred: compensation reliability, retries, and recovery
 
-Complete the remaining main booking features before starting this increment. The current compensation flow can leave a `BookingStep` stuck in `compensating` when dispatching the compensation command fails, the agent acknowledges the command before publishing its `compensated` event, or the event never reaches the orchestrator.
+The current compensation flow can leave a `BookingStep` stuck in `compensating` when dispatching the compensation command fails, the agent acknowledges the command before publishing its `compensated` event, or the event never reaches the orchestrator.
 
 ### Required reliability work
 
