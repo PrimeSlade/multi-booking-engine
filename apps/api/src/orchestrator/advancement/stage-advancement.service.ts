@@ -8,10 +8,13 @@ import {
 import { StepCompletionService } from '@/orchestrator/completion/step-completion.service';
 import { SagaCompensationService } from '@/orchestrator/compensation/saga-compensation.service';
 import { GeneratedGraph } from '@/graph';
+import { isTestSimulationMode } from '@/common/runtime-mode';
 
 type CompletedStep = NonNullable<
   Awaited<ReturnType<StepCompletionService['applyCompletion']>>
 >;
+
+const TEST_ALLOTMENT_DISPATCH_DELAY_MS = 5000;
 
 @Injectable()
 export class StageAdvancementService {
@@ -94,6 +97,12 @@ export class StageAdvancementService {
     if (!nextStageDef) {
       await this.finalizeBooking(bookingId, graph, stage);
       return;
+    }
+
+    if (nextStageDef.join === 'all_or_ask' && isTestSimulationMode()) {
+      await new Promise<void>((resolve) =>
+        setTimeout(resolve, TEST_ALLOTMENT_DISPATCH_DELAY_MS),
+      );
     }
 
     // Conditional bulk update doubles as a claim: if two sibling completions

@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "pnpm --parallel -r dev",
+    "dev:test": "NODE_ENV=test pnpm --parallel -r dev",
     "dev:api": "pnpm --filter @booking/api start:dev",
+    "dev:api:test": "NODE_ENV=test pnpm --filter @booking/api start:dev",
     "dev:web": "pnpm --filter @booking/web dev",
     "build": "pnpm -r build",
     "build:api": "pnpm --filter @booking/api build",
