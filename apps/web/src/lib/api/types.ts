@@ -22,7 +22,7 @@ export type Room = {
   hotelId: string;
   roomType: string;
   price: string;
-  available: boolean;
+  roomsLeft: number;
 };
 
 export type Hotel = {
@@ -112,4 +112,5 @@ export type SelectedRoom = {
   roomId: string;
   checkIn: string;
   checkOut: string;
+  rooms: number;
 };

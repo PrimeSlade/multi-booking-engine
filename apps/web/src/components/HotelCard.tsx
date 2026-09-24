@@ -41,7 +41,13 @@ export function HotelCard({
                   : 'border-border hover:bg-secondary'
               }`}
             >
-              <span>{room.roomType}</span>
+              <span className="flex flex-col">
+                <span>{room.roomType}</span>
+                <span className="text-xs text-muted-foreground">
+                  {room.roomsLeft} {room.roomsLeft === 1 ? 'room' : 'rooms'}{' '}
+                  left
+                </span>
+              </span>
               <span className="flex items-center gap-2">
                 <span className="text-muted-foreground">
                   {formatCurrency(room.price)}/night

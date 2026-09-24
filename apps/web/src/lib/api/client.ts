@@ -39,3 +39,7 @@ export function fetchAvailableHotels() {
 export function createBooking(payload: CreateBookingPayload) {
   return unwrap<Booking>(http.post('/bookings', payload));
 }
+
+export function fetchBooking(id: string) {
+  return unwrap<Booking>(http.get(`/bookings/${id}`));
+}

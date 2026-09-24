@@ -13,6 +13,12 @@ const STEP_LABELS: Record<string, string> = {
   'itinerary.notify': 'Sending confirmation',
 };
 
+function stepBadgeVariant(status: string) {
+  if (status === 'success') return 'success';
+  if (status === 'failed') return 'destructive';
+  return 'outline';
+}
+
 export function BookingConfirmation({
   booking,
   onReset,
@@ -40,7 +46,9 @@ export function BookingConfirmation({
               className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm"
             >
               <span>{STEP_LABELS[step.stepName] ?? step.stepName}</span>
-              <Badge variant="outline">{step.status}</Badge>
+              <Badge variant={stepBadgeVariant(step.status)}>
+                {step.status}
+              </Badge>
             </div>
           ))}
       </div>

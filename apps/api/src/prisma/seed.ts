@@ -235,7 +235,7 @@ async function main() {
             hotelId,
             roomType,
             price: String(randomInt(100, 800)),
-            available: true,
+            roomsLeft: 10,
           });
         } catch (e) {
           // Ignore duplicate errors
@@ -247,11 +247,22 @@ async function main() {
     if (hotelCount >= 50) break;
   }
 
+  console.log('🚫 Seeding fraud blacklist...');
+  const blacklistedUserIds = ['ok@email.com', 'slade@email.com'];
+  for (const userId of blacklistedUserIds) {
+    try {
+      await db.orm.public.FraudBlacklist.create({ userId });
+    } catch (e) {
+      // Ignore duplicate errors
+    }
+  }
+
   console.log('✅ Seed completed successfully!');
   console.log(`   Airlines: ${airlines.length}`);
   console.log(`   Flights: 50`);
   console.log(`   Hotels: 50`);
   console.log(`   Rooms: ${50 * roomTypes.length}`);
+  console.log(`   Fraud blacklist: ${blacklistedUserIds.length}`);
 }
 
 main()

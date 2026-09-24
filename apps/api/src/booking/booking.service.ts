@@ -5,6 +5,10 @@ import {
   HotelProductDto,
   PublishBookingDto,
 } from '@/booking/dto/publish-booking.dto';
+import {
+  BookingStepRow,
+  StepDispatchService,
+} from '@/dispatch/step-dispatch.service';
 import { GeneratedStep } from '@/graph';
 import { GraphService } from '@/graph/graph.service';
 
@@ -19,6 +23,7 @@ export class BookingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly graphService: GraphService,
+    private readonly dispatchService: StepDispatchService,
   ) {}
 
   async publish(dto: PublishBookingDto) {
@@ -92,6 +97,20 @@ export class BookingService {
         }),
       ),
     );
+
+    const stepsWithGenerated: Array<{
+      step: BookingStepRow;
+      generated: GeneratedStep;
+    }> = steps.map((step: BookingStepRow, i: number) => ({
+      step,
+      generated: stepPlacements[i].step,
+    }));
+
+    const stage0Pairs = stepsWithGenerated.filter(
+      (pair) => pair.generated.stage === 0,
+    );
+
+    await this.dispatchService.dispatchSteps(stage0Pairs);
 
     return {
       ...booking,

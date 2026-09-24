@@ -32,6 +32,7 @@ import { BOOKING_RMQ_CLIENT, EXCHANGES } from './messaging.constants';
             ),
             exchangeType: 'topic',
             wildcards: true,
+            persistent: true,
           },
         }),
       },

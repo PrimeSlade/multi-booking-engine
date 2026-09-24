@@ -24,6 +24,10 @@
       "model": "FlightBooking",
       "namespace": "public"
     },
+    "fraud_blacklist": {
+      "model": "FraudBlacklist",
+      "namespace": "public"
+    },
     "hotel": {
       "model": "Hotel",
       "namespace": "public"
@@ -728,6 +732,27 @@
               "table": "flight_booking"
             }
           },
+          "FraudBlacklist": {
+            "fields": {
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "fraud_blacklist"
+            }
+          },
           "Hotel": {
             "fields": {
               "city": {
@@ -929,13 +954,6 @@
           },
           "Room": {
             "fields": {
-              "available": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/bool@1",
-                  "kind": "scalar"
-                }
-              },
               "hotelId": {
                 "nullable": false,
                 "type": {
@@ -963,6 +981,13 @@
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
+              },
+              "roomsLeft": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
               }
             },
             "relations": {
@@ -984,9 +1009,6 @@
             },
             "storage": {
               "fields": {
-                "available": {
-                  "column": "available"
-                },
                 "hotelId": {
                   "column": "hotel_id"
                 },
@@ -998,6 +1020,9 @@
                 },
                 "roomType": {
                   "column": "room_type"
+                },
+                "roomsLeft": {
+                  "column": "rooms_left"
                 }
               },
               "namespaceId": "public",
@@ -1468,6 +1493,23 @@
               },
               "uniques": []
             },
+            "fraud_blacklist": {
+              "columns": {
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "user_id"
+                ]
+              },
+              "uniques": []
+            },
             "hotel": {
               "columns": {
                 "city": {
@@ -1589,15 +1631,6 @@
             },
             "room": {
               "columns": {
-                "available": {
-                  "codecId": "pg/bool@1",
-                  "default": {
-                    "kind": "literal",
-                    "value": true
-                  },
-                  "nativeType": "bool",
-                  "nullable": false
-                },
                 "hotel_id": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -1616,6 +1649,15 @@
                 "room_type": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
+                  "nullable": false
+                },
+                "rooms_left": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 10
+                  },
+                  "nativeType": "int4",
                   "nullable": false
                 }
               },
@@ -1690,7 +1732,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "20d08b762e23a247a5236607c810261051fe8a97a9eb1e74b07e5a76eccd5bc3"
+    "storageHash": "0432943f75a24abc37c443768fcbd997fc5b4bdd2d2c5ce0f54e7369d292e076"
   },
   "execution": {
     "executionHash": "efbc1e60f192c8645e4a372146a84c7f56e02402c3446adae30e1f940443f322",
