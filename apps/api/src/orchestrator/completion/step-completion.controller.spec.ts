@@ -9,7 +9,7 @@ jest.mock('@/prisma/prisma.service', () => ({
 import type { RmqContext } from '@nestjs/microservices';
 import { StepCompletionController } from './step-completion.controller';
 import { StepCompletionService } from './step-completion.service';
-import { StageAdvancementService } from './stage-advancement.service';
+import { StageAdvancementService } from '@/orchestrator/advancement/stage-advancement.service';
 import { BookingStepCompletionMessage } from '@/messaging/messaging.types';
 
 describe('StepCompletionController', () => {

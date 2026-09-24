@@ -73,12 +73,15 @@ export type Booking = {
   id: string;
   userId: string;
   status: string;
+  decisionExpiresAt: string | null;
   createdAt: string;
   updatedAt: string;
   flightBookings: FlightBooking[];
   hotelBookings: HotelBooking[];
   steps: BookingStep[];
 };
+
+export type BookingDecision = 'accept_partial' | 'reject_all';
 
 export type FlightProduct = {
   type: 'flight';

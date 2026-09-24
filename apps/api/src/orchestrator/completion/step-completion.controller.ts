@@ -3,8 +3,8 @@ import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import type { Channel, Message } from 'amqplib';
 import { COMPLETION_ROUTING_KEYS } from '@/messaging/messaging.constants';
 import { BookingStepCompletionMessage } from '@/messaging/messaging.types';
-import { StepCompletionService } from '@/orchestrator/step-completion.service';
-import { StageAdvancementService } from '@/orchestrator/stage-advancement.service';
+import { StepCompletionService } from '@/orchestrator/completion/step-completion.service';
+import { StageAdvancementService } from '@/orchestrator/advancement/stage-advancement.service';
 
 @Controller()
 export class StepCompletionController {

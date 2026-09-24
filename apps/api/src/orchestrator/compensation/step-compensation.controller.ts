@@ -3,7 +3,7 @@ import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import type { Channel, Message } from 'amqplib';
 import { COMPENSATED_ROUTING_KEYS } from '@/messaging/messaging.constants';
 import { BookingStepCompensatedMessage } from '@/messaging/messaging.types';
-import { StepCompensationService } from '@/orchestrator/step-compensation.service';
+import { StepCompensationService } from '@/orchestrator/compensation/step-compensation.service';
 
 @Controller()
 export class StepCompensationController {
