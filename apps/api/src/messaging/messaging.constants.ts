@@ -47,6 +47,7 @@ export const ROUTING_PATTERNS = {
 // entry at a time as each agent starts publishing completions.
 export const COMPLETION_ROUTING_KEYS = {
   FLIGHT_AVAILABILITY: 'booking.step.completed.flight.availability',
+  HOTEL_AVAILABILITY: 'booking.step.completed.hotel.availability',
   FRAUD: 'booking.step.completed.itinerary.fraud',
   FLIGHT_ALLOTMENT: 'booking.step.completed.flight.allotment',
   PAYMENT: 'booking.step.completed.itinerary.payment',

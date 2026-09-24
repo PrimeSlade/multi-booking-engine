@@ -46,6 +46,10 @@ async function bootstrap() {
       queue: QUEUES.FLIGHT_AVAILABILITY,
       routingKey: QUEUES.FLIGHT_AVAILABILITY,
     },
+    {
+      queue: QUEUES.HOTEL_AVAILABILITY,
+      routingKey: QUEUES.HOTEL_AVAILABILITY,
+    },
     { queue: QUEUES.FRAUD, routingKey: QUEUES.FRAUD },
     { queue: QUEUES.FLIGHT_ALLOTMENT, routingKey: QUEUES.FLIGHT_ALLOTMENT },
     { queue: QUEUES.PAYMENT, routingKey: QUEUES.PAYMENT },
