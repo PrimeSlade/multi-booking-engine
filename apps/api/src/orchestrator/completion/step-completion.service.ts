@@ -16,13 +16,12 @@ export class StepCompletionService {
     // null if nothing matched (updateAll()/updateAndCount() are the
     // bulk/streaming/count-only forms - not what we want for a lookup by id).
     //
-    // Not handled yet: this doesn't check message.attempt against the row's
-    // current attempt, so a stale completion from an earlier attempt could
-    // clobber a newer one if it arrives late. Not reachable today (every
-    // step is attempt: 0, no retries exist yet) - worth revisiting once
-    // retries land.
+    // A completion can be redelivered after a publish/ack failure. Only the
+    // active attempt may settle the step and advance its stage.
     const updated = await this.prisma.db.orm.public.BookingStep.where({
       id: message.stepId,
+      status: 'in_progress',
+      attempt: message.attempt,
     }).update({
       status: message.status,
       result: message.result ?? null,
@@ -32,7 +31,7 @@ export class StepCompletionService {
 
     if (updated === null) {
       this.logger.warn(
-        `No BookingStep row found for stepId=${message.stepId} (bookingId=${message.bookingId})`,
+        `No active BookingStep row found for stepId=${message.stepId} (bookingId=${message.bookingId}, attempt=${message.attempt})`,
       );
     }
 

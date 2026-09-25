@@ -113,6 +113,7 @@ describe('BookingService', () => {
                 }),
               ),
             where: jest.fn().mockReturnValue({
+              updateAll: jest.fn().mockResolvedValue([]),
               all: jest.fn().mockReturnValue({
                 toArray: jest.fn().mockResolvedValue([...mockCreatedSteps]),
               }),
@@ -231,6 +232,7 @@ describe('BookingService', () => {
           flightBookingId: string | null;
           hotelBookingId: string | null;
           stepName: string;
+          status: string;
         }>;
       };
 
@@ -295,6 +297,25 @@ describe('BookingService', () => {
         'hotel.availability',
         'hotel.availability',
       ]);
+
+      expect(mockPrisma.db.orm.public.BookingStep.where).toHaveBeenCalledWith({
+        bookingId: 'booking-uuid-1',
+        stage: 0,
+        status: 'pending',
+      });
+      const stepQuery = mockPrisma.db.orm.public.BookingStep.where.mock
+        .results[0].value as { updateAll: jest.Mock };
+      expect(stepQuery.updateAll).toHaveBeenCalledWith({
+        status: 'in_progress',
+      });
+      expect(stepQuery.updateAll.mock.invocationCallOrder[0]).toBeLessThan(
+        mockDispatchService.dispatchSteps.mock.invocationCallOrder[0],
+      );
+      expect(
+        result.steps
+          .filter((step) => step.stepName.endsWith('availability'))
+          .every((step) => step.status === 'in_progress'),
+      ).toBe(true);
 
       expect(result.id).toBe('booking-uuid-1');
     });

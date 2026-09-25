@@ -1,4 +1,5 @@
 import { of, throwError } from 'rxjs';
+import { Logger } from '@nestjs/common';
 import type { RmqContext } from '@nestjs/microservices';
 import { NotifyController } from './notify.controller';
 import { NotifyService } from './notify.service';
@@ -20,12 +21,15 @@ describe('NotifyController', () => {
 
   const buildContext = () => {
     const channel = { ack: jest.fn(), nack: jest.fn() };
+    const originalMsg = {};
     const context = {
       getChannelRef: () => channel,
-      getMessage: () => ({}),
+      getMessage: () => originalMsg,
     } as unknown as RmqContext;
     return { channel, context };
   };
+
+  afterEach(() => jest.restoreAllMocks());
 
   it('acks and publishes a success completion', async () => {
     const emit = jest.fn().mockReturnValue(of(undefined));
@@ -58,6 +62,7 @@ describe('NotifyController', () => {
   });
 
   it('nacks and does not publish when notification fails', async () => {
+    const log = jest.spyOn(Logger.prototype, 'error').mockImplementation();
     const emit = jest.fn().mockReturnValue(of(undefined));
     const notifyService = {
       sendNotification: jest.fn().mockRejectedValue(new Error('send failed')),
@@ -70,6 +75,10 @@ describe('NotifyController', () => {
     expect(channel.nack).toHaveBeenCalledWith({}, false, false);
     expect(channel.ack).not.toHaveBeenCalled();
     expect(emit).not.toHaveBeenCalled();
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining('itinerary.notify failed for stepId=step-notify'),
+      expect.stringContaining('send failed'),
+    );
   });
 
   it('logs but does not throw when publishing the completion fails', async () => {

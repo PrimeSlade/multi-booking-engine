@@ -42,6 +42,8 @@ describe('StepCompletionService', () => {
 
     expect(mockPrisma.db.orm.public.BookingStep.where).toHaveBeenCalledWith({
       id: 'step-1',
+      status: 'in_progress',
+      attempt: 0,
     });
     const whereResult = mockPrisma.db.orm.public.BookingStep.where.mock
       .results[0].value as { update: jest.Mock };
@@ -101,5 +103,30 @@ describe('StepCompletionService', () => {
         error: null,
       }),
     ).resolves.toBeNull();
+  });
+
+  it('does not update a step when its completion is stale or duplicated', async () => {
+    const update = jest.fn().mockResolvedValue(null);
+    mockPrisma.db.orm.public.BookingStep.where.mockReturnValue({ update });
+
+    const result = await service.applyCompletion({
+      stepId: 'step-1',
+      bookingId: 'booking-1',
+      stepName: 'flight.availability',
+      scope: 'product',
+      agent: 'flight-agent',
+      flightBookingId: 'fb-1',
+      hotelBookingId: null,
+      attempt: 1,
+      status: 'failed',
+      error: { code: 'RETRY_EXHAUSTED', retryable: false },
+    });
+
+    expect(mockPrisma.db.orm.public.BookingStep.where).toHaveBeenCalledWith({
+      id: 'step-1',
+      status: 'in_progress',
+      attempt: 1,
+    });
+    expect(result).toBeNull();
   });
 });

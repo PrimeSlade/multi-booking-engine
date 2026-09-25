@@ -15,6 +15,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.enableShutdownHooks();
   app.enableCors();
 
   const configService = app.get(ConfigService);
@@ -28,10 +29,7 @@ async function bootstrap() {
     EXCHANGES.BOOKING_TOPIC,
   );
 
-  // One RMQ listener per queue: the shared "step completed" queue, plus one
-  // per agent's own step queue (currently flight-agent's availability check
-  // and fraud-agent's fraud check; more get appended here as agents are
-  // added).
+  // One RMQ listener per booking queue, with an explicit routing key.
   //
   // wildcards is off and routingKey is explicit on all of them: with
   // wildcards on, a queue auto-binds to every @EventPattern registered
@@ -80,7 +78,7 @@ async function bootstrap() {
         exchangeType: 'topic',
         wildcards: false,
         routingKey,
-        noAck: false, // enables manual acknowledgment
+        noAck: false,
         queueOptions: {
           durable: true,
           arguments: {
@@ -90,6 +88,27 @@ async function bootstrap() {
       },
     });
   }
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: [rmqUrl],
+      queue: QUEUES.RETRY_INBOX,
+      exchange: EXCHANGES.BOOKING_DLX,
+      exchangeType: 'topic',
+      wildcards: false,
+      routingKey: ROUTING_PATTERNS.ALL_DEAD_LETTERED,
+      noAck: false,
+      prefetchCount: 10,
+      queueOptions: { durable: true },
+      deserializer: {
+        deserialize: (value: unknown) => ({
+          pattern: QUEUES.RETRY_INBOX,
+          data: value,
+        }),
+      },
+    },
+  });
 
   await app.startAllMicroservices();
 

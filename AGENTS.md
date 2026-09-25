@@ -74,5 +74,12 @@ docker-compose down
 
 ---
 
+## Code Design and Readability
+- **Do not overengineer**: Choose the simplest design that meets the current requirements. Avoid abstractions, branches, configuration, and extra files added only for hypothetical future use.
+- **Write for junior developers**: Use clear names, straightforward control flow, and focused functions. Add brief comments when the reason for a decision is not clear from the code.
+- **Balance simplicity with quality**: Keep necessary validation, error handling, type safety, and meaningful tests. Simplify code without making behavior harder to understand or less reliable.
+
+---
+
 ## Writing Style
 - **No em dashes**: Do not use the em dash (—) in code comments, commit messages, docs, or any written output. Use a comma, period, or parentheses instead.
