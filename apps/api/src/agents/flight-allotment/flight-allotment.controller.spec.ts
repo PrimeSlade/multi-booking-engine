@@ -27,12 +27,15 @@ describe('FlightAllotmentController', () => {
 
   const buildContext = () => {
     const channel = { ack: jest.fn(), nack: jest.fn() };
+    const originalMsg = {};
     const context = {
       getChannelRef: () => channel,
-      getMessage: () => ({}),
+      getMessage: () => originalMsg,
     } as unknown as RmqContext;
     return { channel, context };
   };
+
+  afterEach(() => jest.restoreAllMocks());
 
   it('acks and publishes a success completion when a seat is reserved', async () => {
     const emit = jest.fn().mockReturnValue(of(undefined));

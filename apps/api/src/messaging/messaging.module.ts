@@ -2,6 +2,8 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BOOKING_RMQ_CLIENT, EXCHANGES } from './messaging.constants';
+import { RetryRouterService } from './retry-router.service';
+import { RetryRouterController } from './retry-router.controller';
 
 /**
  * RabbitMQ messaging module (booking.topic topology).
@@ -38,6 +40,8 @@ import { BOOKING_RMQ_CLIENT, EXCHANGES } from './messaging.constants';
       },
     ]),
   ],
-  exports: [ClientsModule],
+  providers: [RetryRouterService],
+  controllers: [RetryRouterController],
+  exports: [ClientsModule, RetryRouterService],
 })
 export class MessagingModule {}

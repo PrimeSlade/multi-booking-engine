@@ -3,11 +3,10 @@
 # Edit safely: validated with zod on startup and on POST /admin/graph/reload.
 # In-flight bookings keep a snapshot of `version`, so edits only affect new bookings.
 #
-# Retry semantics: `retry.max/backoffMs` is the policy applied ONLY if the
-# agent reports the failure as retryable (error.retryable=true in the
-# completion payload, e.g. GATEWAY_TIMEOUT). Non-retryable failures
-# (e.g. NO_AVAILABILITY) fail immediately regardless of max.
-# The orchestrator checks message retryable + attempt < max.
+# Retry semantics: processing exceptions in primary workers are retried up to
+# `retry.max` times with exponential delays based on `retry.backoffMs`.
+# Business failures (e.g. NO_AVAILABILITY) are acknowledged and fail immediately.
+# Exhausted processing failures produce a failed completion and enter the DLQ.
 #
 # Routing convention:
 #   dispatch:   booking.step.<product>.<stepName>

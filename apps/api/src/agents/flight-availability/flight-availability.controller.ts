@@ -71,8 +71,7 @@ export class FlightAvailabilityController {
         `flight.availability check failed for stepId=${data.stepId}`,
         err instanceof Error ? err.stack : String(err),
       );
-      // Processing itself broke (not a business outcome) - log and drop.
-      // No DLQ consumer exists yet, so requeueing would just loop forever.
+      // RabbitMQ records this rejection in x-death and routes it to retry.
       channel.nack(originalMsg, false, false);
       return;
     }

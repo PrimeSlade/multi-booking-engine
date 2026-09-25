@@ -110,13 +110,24 @@ export class BookingService {
       (pair) => pair.generated.stage === 0,
     );
 
+    if (stage0Pairs.length > 0) {
+      await this.prisma.db.orm.public.BookingStep.where({
+        bookingId: booking.id,
+        stage: 0,
+        status: 'pending',
+      }).updateAll({ status: 'in_progress' });
+    }
+
     await this.dispatchService.dispatchSteps(stage0Pairs);
 
     return {
       ...booking,
       flightBookings,
       hotelBookings,
-      steps,
+      steps: steps.map(
+        (step: BookingStepRow & { stage: number; status: string }) =>
+          step.stage === 0 ? { ...step, status: 'in_progress' as const } : step,
+      ),
     };
   }
 

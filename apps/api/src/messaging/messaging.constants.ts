@@ -11,6 +11,7 @@ export const QUEUES = {
   // Orchestration & Resilience
   COMPLETED: 'booking.step.completed',
   DLQ: 'booking.dlq',
+  RETRY_INBOX: 'booking.retry.inbox',
 
   // Step Worker Queues (Stage 0 - Parallel)
   FLIGHT_AVAILABILITY: 'booking.step.flight.availability',
@@ -37,6 +38,7 @@ export const QUEUES = {
 } as const;
 
 export const ROUTING_PATTERNS = {
+  ALL_DEAD_LETTERED: 'booking.step.#',
   ALL_COMPLETED: 'booking.step.completed.#',
   ALL_COMPENSATE: 'booking.step.compensate.#',
   ALL_COMPENSATED: 'booking.step.compensated.#',
