@@ -54,6 +54,9 @@ export type FlightBooking = {
   destination: string;
   departureDate: string;
   passengers: number;
+  // Demo only: seats booked by the simulated other customer just before this
+  // booking reserved. 0 when nobody took it.
+  simulatedTakenCount?: number;
 };
 
 export type HotelBooking = {
@@ -67,6 +70,9 @@ export type HotelBooking = {
   checkIn: string;
   checkOut: string;
   rooms: number;
+  // Demo only: rooms booked by the simulated other customer just before this
+  // booking reserved. 0 when nobody took it.
+  simulatedTakenCount?: number;
 };
 
 export type Booking = {
@@ -91,6 +97,8 @@ export type FlightProduct = {
   destination: string;
   departureDate: string;
   passengers?: number;
+  // Demo only: a simulated other customer takes this item before reservation.
+  simulateTakenByOther?: boolean;
 };
 
 export type HotelProduct = {
@@ -103,6 +111,8 @@ export type HotelProduct = {
   checkIn: string;
   checkOut: string;
   rooms?: number;
+  // Demo only: a simulated other customer takes this item before reservation.
+  simulateTakenByOther?: boolean;
 };
 
 export type CreateBookingPayload = {
@@ -116,4 +126,6 @@ export type SelectedRoom = {
   checkIn: string;
   checkOut: string;
   rooms: number;
+  // Demo only: set from the "Someone else takes this" checkbox.
+  takenByOther?: boolean;
 };

@@ -30,36 +30,51 @@ export function HotelCard({
       <div className="flex flex-col gap-2">
         {hotel.rooms.map((room) => {
           const selected = selectedRoomIds.includes(room.id);
+          const soldOut = room.roomsLeft === 0;
           return (
             <button
               key={room.id}
               type="button"
+              // A selected room can still be removed after it sells out.
+              disabled={soldOut && !selected}
               onClick={() => onToggleRoom(room.id)}
               className={`flex items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition-colors ${
                 selected
                   ? 'border-primary bg-secondary'
-                  : 'border-border hover:bg-secondary'
+                  : soldOut
+                    ? 'cursor-not-allowed border-border bg-muted opacity-60'
+                    : 'border-border hover:bg-secondary'
               }`}
             >
               <span className="flex flex-col">
                 <span>{room.roomType}</span>
-                <span className="text-xs text-muted-foreground">
-                  {room.roomsLeft} {room.roomsLeft === 1 ? 'room' : 'rooms'}{' '}
-                  left
-                </span>
+                {soldOut ? (
+                  <span className="text-xs font-medium text-red-700">
+                    Sold out
+                  </span>
+                ) : (
+                  <span className="text-xs text-muted-foreground">
+                    {room.roomsLeft} {room.roomsLeft === 1 ? 'room' : 'rooms'}{' '}
+                    left
+                  </span>
+                )}
               </span>
               <span className="flex items-center gap-2">
                 <span className="text-muted-foreground">
                   {formatCurrency(room.price)}/night
                 </span>
-                <Badge
-                  variant={selected ? undefined : 'outline'}
-                  className={
-                    selected ? 'bg-primary text-primary-foreground' : ''
-                  }
-                >
-                  {selected ? 'Added' : 'Add'}
-                </Badge>
+                {soldOut && !selected ? (
+                  <Badge variant="destructive">Sold out</Badge>
+                ) : (
+                  <Badge
+                    variant={selected ? undefined : 'outline'}
+                    className={
+                      selected ? 'bg-primary text-primary-foreground' : ''
+                    }
+                  >
+                    {selected ? 'Added' : 'Add'}
+                  </Badge>
+                )}
               </span>
             </button>
           );

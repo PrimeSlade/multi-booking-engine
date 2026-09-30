@@ -41,6 +41,27 @@ export function BookingConfirmation({
     (step) => step.status === 'failed',
   ).length;
 
+  // Demo only: items another customer booked just before this booking
+  // reserved (the "Someone else takes this" checkbox).
+  const takenByOtherMessages = [
+    ...booking.flightBookings
+      .filter((item) => (item.simulatedTakenCount ?? 0) > 0)
+      .map(
+        (item) =>
+          `Another customer booked ${item.simulatedTakenCount} seat(s) on ${
+            item.flightNumber ?? `${item.origin} → ${item.destination}`
+          } just before you.`,
+      ),
+    ...booking.hotelBookings
+      .filter((item) => (item.simulatedTakenCount ?? 0) > 0)
+      .map(
+        (item) =>
+          `Another customer booked ${item.simulatedTakenCount} ${
+            item.roomType ?? 'room'
+          } room(s) at ${item.hotelName ?? item.city} just before you.`,
+      ),
+  ];
+
   const decide = async (decision: BookingDecision) => {
     setDecisionLoading(true);
     setDecisionError(null);
@@ -88,6 +109,15 @@ export function BookingConfirmation({
             </div>
           ))}
       </div>
+      {takenByOtherMessages.length > 0 && (
+        <div className="flex min-w-0 flex-col gap-1 rounded-md border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
+          {takenByOtherMessages.map((message) => (
+            <p key={message} className="break-words">
+              {message}
+            </p>
+          ))}
+        </div>
+      )}
       {booking.status === 'awaiting_user_decision' && (
         <div className="flex min-w-0 flex-col gap-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
           <div className="min-w-0 break-words">

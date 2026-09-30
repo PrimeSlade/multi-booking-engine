@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import './App.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { FlightCard } from '@/components/FlightCard';
 import { HotelCard } from '@/components/HotelCard';
 import { TripSummary } from '@/components/TripSummary';
 import { BookingConfirmation } from '@/components/BookingConfirmation';
+import { ProjectIntroDialog } from '@/components/ProjectIntroDialog';
 import {
   createBooking,
   fetchAvailableFlights,
@@ -42,6 +43,13 @@ export function App() {
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogError, setCatalogError] = useState<string | null>(null);
 
+  // Show the project intro every time someone lands on the page.
+  const [showIntro, setShowIntro] = useState(true);
+  const closeIntro = useCallback(() => setShowIntro(false), []);
+
+  // Demo only: whether a simulated other customer takes the selected flight.
+  const [flightTakenByOther, setFlightTakenByOther] = useState(false);
+
   const [tab, setTab] = useState<Tab>('flights');
   const [query, setQuery] = useState('');
 
@@ -59,29 +67,32 @@ export function App() {
     null,
   );
 
-  useEffect(() => {
-    async function load() {
-      setCatalogLoading(true);
-      setCatalogError(null);
-      try {
-        const [flightData, hotelData] = await Promise.all([
-          fetchAvailableFlights(),
-          fetchAvailableHotels(),
-        ]);
-        console.log('[Flights]', flightData);
-        console.log('[Hotels]', hotelData);
-        setFlights(flightData);
-        setHotels(hotelData);
-      } catch (err) {
-        setCatalogError(
-          err instanceof Error ? err.message : 'Failed to load catalog',
-        );
-      } finally {
-        setCatalogLoading(false);
-      }
+  // showSkeleton is false for background refreshes, so the list does not
+  // flash back to loading placeholders after a booking finishes.
+  const loadCatalog = useCallback(async (showSkeleton: boolean) => {
+    if (showSkeleton) setCatalogLoading(true);
+    setCatalogError(null);
+    try {
+      const [flightData, hotelData] = await Promise.all([
+        fetchAvailableFlights(),
+        fetchAvailableHotels(),
+      ]);
+      console.log('[Flights]', flightData);
+      console.log('[Hotels]', hotelData);
+      setFlights(flightData);
+      setHotels(hotelData);
+    } catch (err) {
+      setCatalogError(
+        err instanceof Error ? err.message : 'Failed to load catalog',
+      );
+    } finally {
+      if (showSkeleton) setCatalogLoading(false);
     }
-    void load();
   }, []);
+
+  useEffect(() => {
+    void loadCatalog(true);
+  }, [loadCatalog]);
 
   // The confirmation page shows step statuses, but createBooking's response
   // is a one-time snapshot from the moment the booking was submitted - the
@@ -114,6 +125,17 @@ export function App() {
       clearTimeout(timer);
     };
   }, [confirmedBooking]);
+
+  // Inventory changes the moment a step changes status (a seat is reserved,
+  // or released by compensation), not only when the whole booking ends. So
+  // reload the catalog whenever any step status changes. The key is a plain
+  // string, so polls that return the same statuses do not trigger a reload.
+  const stepStatusKey = confirmedBooking?.steps
+    .map((step) => `${step.id}:${step.status}`)
+    .join(',');
+  useEffect(() => {
+    if (stepStatusKey) void loadCatalog(false);
+  }, [stepStatusKey, loadCatalog]);
 
   const selectedFlight = flights.find((f) => f.id === selectedFlightId);
 
@@ -183,6 +205,7 @@ export function App() {
         destination: selectedFlight.destination,
         departureDate: new Date(selectedFlight.departureTime).toISOString(),
         passengers,
+        simulateTakenByOther: flightTakenByOther,
       });
     }
 
@@ -197,6 +220,7 @@ export function App() {
         checkIn: new Date(selection.checkIn).toISOString(),
         checkOut: new Date(selection.checkOut).toISOString(),
         rooms: selection.rooms,
+        simulateTakenByOther: selection.takenByOther ?? false,
       });
     }
 
@@ -221,6 +245,7 @@ export function App() {
     setSelectedFlightId(null);
     setSelectedRooms([]);
     setPassengers(1);
+    setFlightTakenByOther(false);
   };
 
   const handleBookingDecision = async (decision: BookingDecision) => {
@@ -240,7 +265,16 @@ export function App() {
           Search flights and hotels, then confirm your itinerary. Add as many
           hotel stays as your trip needs.
         </p>
+        <button
+          type="button"
+          onClick={() => setShowIntro(true)}
+          className="mt-2 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+        >
+          About this project and test scenarios
+        </button>
       </div>
+
+      <ProjectIntroDialog open={showIntro} onClose={closeIntro} />
 
       <div className="grid gap-6 md:grid-cols-[1fr_360px]">
         <div className="flex flex-col gap-4">
@@ -341,6 +375,8 @@ export function App() {
                   onEmailChange={setEmail}
                   onBook={handleBook}
                   bookingState={bookingState}
+                  flightTakenByOther={flightTakenByOther}
+                  onFlightTakenByOtherChange={setFlightTakenByOther}
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">

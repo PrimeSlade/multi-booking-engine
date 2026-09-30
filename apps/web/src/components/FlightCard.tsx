@@ -1,4 +1,5 @@
 import { Plane } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { Flight } from '@/lib/api/types';
@@ -13,11 +14,12 @@ export function FlightCard({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const soldOut = flight.seatsLeft === 0;
   return (
     <Card
       className={`flex items-center justify-between gap-4 p-4 transition-colors ${
         selected ? 'border-primary ring-1 ring-primary' : ''
-      }`}
+      } ${soldOut ? 'bg-muted opacity-60' : ''}`}
     >
       <div className="flex items-center gap-3">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary">
@@ -32,19 +34,27 @@ export function FlightCard({
           <p className="text-xs text-muted-foreground">
             {flight.flightNumber} · {formatDateTime(flight.departureTime)}
           </p>
-          <p className="text-xs text-muted-foreground">
-            {flight.seatsLeft} seats left
-          </p>
+          {soldOut ? (
+            <Badge variant="destructive" className="mt-1">
+              Sold out
+            </Badge>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {flight.seatsLeft} seats left
+            </p>
+          )}
         </div>
       </div>
       <div className="flex flex-col items-end gap-2">
         <p className="text-sm font-semibold">{formatCurrency(flight.price)}</p>
+        {/* A selected flight can still be deselected after it sells out. */}
         <Button
           size="sm"
           variant={selected ? 'default' : 'outline'}
+          disabled={soldOut && !selected}
           onClick={onSelect}
         >
-          {selected ? 'Selected' : 'Select'}
+          {selected ? 'Selected' : soldOut ? 'Unavailable' : 'Select'}
         </Button>
       </div>
     </Card>

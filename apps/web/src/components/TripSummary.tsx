@@ -49,6 +49,31 @@ function Stepper({
   );
 }
 
+function TakenByOtherCheckbox({
+  id,
+  checked,
+  onChange,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <label
+      htmlFor={id}
+      className="mt-1 flex items-center gap-1.5 text-xs text-amber-700"
+    >
+      <input
+        id={id}
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      Someone else takes this
+    </label>
+  );
+}
+
 export function TripSummary({
   flight,
   passengers,
@@ -63,6 +88,8 @@ export function TripSummary({
   onEmailChange,
   onBook,
   bookingState,
+  flightTakenByOther,
+  onFlightTakenByOtherChange,
 }: {
   flight?: Flight;
   passengers: number;
@@ -77,6 +104,9 @@ export function TripSummary({
   onEmailChange: (value: string) => void;
   onBook: () => void;
   bookingState: RequestState;
+  // Demo only: a simulated other customer takes the flight before reservation.
+  flightTakenByOther: boolean;
+  onFlightTakenByOtherChange: (value: boolean) => void;
 }) {
   const flightTotal = flight ? Number(flight.price) * passengers : 0;
   const hotelTotal = rooms.reduce((sum, { room, selection }) => {
@@ -119,6 +149,11 @@ export function TripSummary({
                 </span>
                 <Stepper value={passengers} onChange={onPassengersChange} />
               </div>
+              <TakenByOtherCheckbox
+                id="takenByOther-flight"
+                checked={flightTakenByOther}
+                onChange={onFlightTakenByOtherChange}
+              />
             </div>
           </div>
           <div className="flex items-start gap-2">
@@ -165,6 +200,13 @@ export function TripSummary({
                       {room.roomsLeft} available
                     </span>
                   </div>
+                  <TakenByOtherCheckbox
+                    id={`takenByOther-${room.id}`}
+                    checked={selection.takenByOther ?? false}
+                    onChange={(value) =>
+                      onUpdateRoom(room.id, { takenByOther: value })
+                    }
+                  />
                 </div>
               </div>
               <div className="flex items-start gap-2">
