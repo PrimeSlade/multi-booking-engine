@@ -8,6 +8,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsDateString,
   IsIn,
   IsInt,
@@ -84,6 +85,16 @@ export class FlightProductDto extends BookingProductDto {
   @IsInt()
   @Min(1)
   passengers?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Demo only. A simulated other customer takes this item right before reservation, so this item fails and the booking becomes a partial failure. The taken inventory is not returned (re-seed to restore it).',
+    example: false,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  simulateTakenByOther?: boolean;
 }
 
 export class HotelProductDto extends BookingProductDto {
@@ -154,6 +165,16 @@ export class HotelProductDto extends BookingProductDto {
   @IsInt()
   @Min(1)
   rooms?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Demo only. A simulated other customer takes this item right before reservation, so this item fails and the booking becomes a partial failure. The taken inventory is not returned (re-seed to restore it).',
+    example: false,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  simulateTakenByOther?: boolean;
 }
 
 @ApiExtraModels(FlightProductDto, HotelProductDto)

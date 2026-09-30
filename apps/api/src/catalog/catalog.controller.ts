@@ -8,13 +8,17 @@ export class CatalogController {
   constructor(private readonly catalogService: CatalogService) {}
 
   @Get('flights')
-  @ApiOperation({ summary: 'List flights with seats available' })
+  @ApiOperation({
+    summary: 'List flights, including sold-out ones (seatsLeft 0)',
+  })
   findAvailableFlights() {
     return this.catalogService.findAvailableFlights();
   }
 
   @Get('hotels')
-  @ApiOperation({ summary: 'List hotels with available rooms' })
+  @ApiOperation({
+    summary: 'List hotels and rooms, including sold-out rooms (roomsLeft 0)',
+  })
   findAvailableHotels() {
     return this.catalogService.findAvailableHotels();
   }

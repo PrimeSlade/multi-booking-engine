@@ -667,6 +667,20 @@
                   "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
+              },
+              "simulateTakenByOther": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "simulatedTakenCount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
               }
             },
             "relations": {
@@ -726,6 +740,12 @@
                 },
                 "passengers": {
                   "column": "passengers"
+                },
+                "simulateTakenByOther": {
+                  "column": "simulate_taken_by_other"
+                },
+                "simulatedTakenCount": {
+                  "column": "simulated_taken_count"
                 }
               },
               "namespaceId": "public",
@@ -881,6 +901,20 @@
                   "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
+              },
+              "simulateTakenByOther": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "simulatedTakenCount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
               }
             },
             "relations": {
@@ -946,6 +980,12 @@
                 },
                 "rooms": {
                   "column": "rooms"
+                },
+                "simulateTakenByOther": {
+                  "column": "simulate_taken_by_other"
+                },
+                "simulatedTakenCount": {
+                  "column": "simulated_taken_count"
                 }
               },
               "namespaceId": "public",
@@ -1456,6 +1496,24 @@
                   },
                   "nativeType": "int4",
                   "nullable": false
+                },
+                "simulate_taken_by_other": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "simulated_taken_count": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
                 }
               },
               "foreignKeys": [
@@ -1589,6 +1647,24 @@
                   "default": {
                     "kind": "literal",
                     "value": 1
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "simulate_taken_by_other": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "simulated_taken_count": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
                   },
                   "nativeType": "int4",
                   "nullable": false
@@ -1732,7 +1808,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "0432943f75a24abc37c443768fcbd997fc5b4bdd2d2c5ce0f54e7369d292e076"
+    "storageHash": "d4d81d9bd359840df03fbc821eb5d83d16816a135a9bc8f27d506c720a9226d7"
   },
   "execution": {
     "executionHash": "efbc1e60f192c8645e4a372146a84c7f56e02402c3446adae30e1f940443f322",

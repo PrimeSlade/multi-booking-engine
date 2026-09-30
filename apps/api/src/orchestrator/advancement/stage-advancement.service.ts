@@ -9,6 +9,7 @@ import { StepCompletionService } from '@/orchestrator/completion/step-completion
 import { SagaCompensationService } from '@/orchestrator/compensation/saga-compensation.service';
 import { GeneratedGraph } from '@/graph';
 import { isTestSimulationMode } from '@/common/runtime-mode';
+import { SimulatedCompetitorService } from '@/orchestrator/simulation/simulated-competitor.service';
 
 type CompletedStep = NonNullable<
   Awaited<ReturnType<StepCompletionService['applyCompletion']>>
@@ -25,6 +26,7 @@ export class StageAdvancementService {
     private readonly graphService: GraphService,
     private readonly dispatchService: StepDispatchService,
     private readonly compensationService: SagaCompensationService,
+    private readonly simulatedCompetitor: SimulatedCompetitorService,
   ) {}
 
   async maybeAdvance(step: CompletedStep): Promise<void> {
@@ -117,6 +119,11 @@ export class StageAdvancementService {
     }).updateAll({ status: 'in_progress' });
 
     if (claimed.length === 0) return;
+
+    // Only the caller that claimed the stage gets here, so this runs once.
+    if (nextStageDef.join === 'all_or_ask') {
+      await this.simulatedCompetitor.takeMarkedItems(bookingId);
+    }
 
     const pairs = claimed.map((row: BookingStepRow) => {
       const generated = nextStageDef.steps.find(

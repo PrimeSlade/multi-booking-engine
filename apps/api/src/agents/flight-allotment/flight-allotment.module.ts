@@ -5,5 +5,8 @@ import { FlightAllotmentService } from '@/agents/flight-allotment/flight-allotme
 @Module({
   controllers: [FlightAllotmentController],
   providers: [FlightAllotmentService],
+  // Exported so the orchestrator's simulated other customer can reserve
+  // through the same allotment code as a real booking.
+  exports: [FlightAllotmentService],
 })
 export class FlightAllotmentModule {}

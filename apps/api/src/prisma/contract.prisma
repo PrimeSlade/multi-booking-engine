@@ -54,6 +54,12 @@ model FlightBooking {
   departureDate TimestamptzString @map("departure_date")
   passengers    Int               @default(1)
 
+  // Demo only: a simulated other customer takes this item's inventory right
+  // before reservation, so this item fails. simulatedTakenCount records how
+  // much was taken (it is not returned; re-seed to restore inventory).
+  simulateTakenByOther Boolean @default(false) @map("simulate_taken_by_other")
+  simulatedTakenCount  Int     @default(0) @map("simulated_taken_count")
+
   steps BookingStep[]
 
   @@index([bookingId])
@@ -73,6 +79,12 @@ model HotelBooking {
   checkIn   TimestamptzString @map("check_in")
   checkOut  TimestamptzString @map("check_out")
   rooms     Int               @default(1)
+
+  // Demo only: a simulated other customer takes this item's inventory right
+  // before reservation, so this item fails. simulatedTakenCount records how
+  // much was taken (it is not returned; re-seed to restore inventory).
+  simulateTakenByOther Boolean @default(false) @map("simulate_taken_by_other")
+  simulatedTakenCount  Int     @default(0) @map("simulated_taken_count")
 
   steps BookingStep[]
 

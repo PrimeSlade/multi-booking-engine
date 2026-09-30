@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'d4d81d9bd359840df03fbc821eb5d83d16816a135a9bc8f27d506c720a9226d7'>;
+  StorageHashBase<'87ff4d62c5b4b9bc6ef91072404dd386d4878b87065577434ee082a5c150232d'>;
 export type ExecutionHash =
   ExecutionHashBase<'efbc1e60f192c8645e4a372146a84c7f56e02402c3446adae30e1f940443f322'>;
 export type ProfileHash =
@@ -544,6 +544,7 @@ export type FieldOutputTypes = {
         | 'failed';
       readonly decisionExpiresAt:
         CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly simulatePartialFailure: CodecTypes['pg/bool@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
@@ -640,6 +641,7 @@ export type FieldInputTypes = {
         | 'failed';
       readonly decisionExpiresAt:
         CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly simulatePartialFailure: CodecTypes['pg/bool@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
@@ -730,6 +732,7 @@ export type StorageColumnTypes = {
       readonly decision_expires_at:
         CodecTypes['pg/timestamptz-string@1']['output'] | null;
       readonly id: CodecTypes['pg/text@1']['output'];
+      readonly simulate_partial_failure: CodecTypes['pg/bool@1']['output'];
       readonly status:
         | 'in_progress'
         | 'awaiting_user_decision'
@@ -826,6 +829,7 @@ export type StorageColumnInputTypes = {
       readonly decision_expires_at:
         CodecTypes['pg/timestamptz-string@1']['input'] | null;
       readonly id: CodecTypes['pg/text@1']['input'];
+      readonly simulate_partial_failure: CodecTypes['pg/bool@1']['input'];
       readonly status:
         | 'in_progress'
         | 'awaiting_user_decision'
@@ -975,6 +979,15 @@ type ContractBase = Omit<
                   readonly nativeType: 'timestamptz';
                   readonly codecId: 'pg/timestamptz-string@1';
                   readonly nullable: true;
+                };
+                readonly simulate_partial_failure: {
+                  readonly nativeType: 'bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
                 };
                 readonly created_at: {
                   readonly nativeType: 'timestamptz';
@@ -1654,6 +1667,13 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamptz-string@1';
                 };
               };
+              readonly simulatePartialFailure: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/bool@1';
+                };
+              };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
@@ -1713,6 +1733,9 @@ type ContractBase = Omit<
                 readonly status: { readonly column: 'status' };
                 readonly decisionExpiresAt: {
                   readonly column: 'decision_expires_at';
+                };
+                readonly simulatePartialFailure: {
+                  readonly column: 'simulate_partial_failure';
                 };
                 readonly createdAt: { readonly column: 'created_at' };
                 readonly updatedAt: { readonly column: 'updated_at' };

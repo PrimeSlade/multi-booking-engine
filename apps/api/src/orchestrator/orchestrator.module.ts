@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { DispatchModule } from '@/dispatch/dispatch.module';
+import { FlightAllotmentModule } from '@/agents/flight-allotment/flight-allotment.module';
+import { HotelAllotmentModule } from '@/agents/hotel-allotment/hotel-allotment.module';
 import { GraphModule } from '@/graph/graph.module';
 import { StepCompletionController } from '@/orchestrator/completion/step-completion.controller';
 import { StepCompletionService } from '@/orchestrator/completion/step-completion.service';
@@ -10,9 +12,15 @@ import { SagaCompensationService } from '@/orchestrator/compensation/saga-compen
 import { BookingDecisionController } from '@/orchestrator/decision/booking-decision.controller';
 import { BookingDecisionService } from '@/orchestrator/decision/booking-decision.service';
 import { DecisionTimeoutService } from '@/orchestrator/decision/decision-timeout.service';
+import { SimulatedCompetitorService } from '@/orchestrator/simulation/simulated-competitor.service';
 
 @Module({
-  imports: [DispatchModule, GraphModule],
+  imports: [
+    DispatchModule,
+    GraphModule,
+    FlightAllotmentModule,
+    HotelAllotmentModule,
+  ],
   controllers: [
     StepCompletionController,
     StepCompensationController,
@@ -25,6 +33,7 @@ import { DecisionTimeoutService } from '@/orchestrator/decision/decision-timeout
     SagaCompensationService,
     BookingDecisionService,
     DecisionTimeoutService,
+    SimulatedCompetitorService,
   ],
 })
 export class OrchestratorModule {}

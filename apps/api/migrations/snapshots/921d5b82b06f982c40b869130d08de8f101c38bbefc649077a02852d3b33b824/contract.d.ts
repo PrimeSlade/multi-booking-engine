@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'d4d81d9bd359840df03fbc821eb5d83d16816a135a9bc8f27d506c720a9226d7'>;
+  StorageHashBase<'921d5b82b06f982c40b869130d08de8f101c38bbefc649077a02852d3b33b824'>;
 export type ExecutionHash =
   ExecutionHashBase<'efbc1e60f192c8645e4a372146a84c7f56e02402c3446adae30e1f940443f322'>;
 export type ProfileHash =
@@ -544,6 +544,7 @@ export type FieldOutputTypes = {
         | 'failed';
       readonly decisionExpiresAt:
         CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly simulatePartialFailure: CodecTypes['pg/bool@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
@@ -589,8 +590,6 @@ export type FieldOutputTypes = {
       readonly destination: CodecTypes['pg/text@1']['output'];
       readonly departureDate: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly passengers: CodecTypes['pg/int4@1']['output'];
-      readonly simulateTakenByOther: CodecTypes['pg/bool@1']['output'];
-      readonly simulatedTakenCount: CodecTypes['pg/int4@1']['output'];
     };
     readonly FraudBlacklist: {
       readonly userId: CodecTypes['pg/text@1']['output'];
@@ -611,8 +610,6 @@ export type FieldOutputTypes = {
       readonly checkIn: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly checkOut: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly rooms: CodecTypes['pg/int4@1']['output'];
-      readonly simulateTakenByOther: CodecTypes['pg/bool@1']['output'];
-      readonly simulatedTakenCount: CodecTypes['pg/int4@1']['output'];
     };
     readonly Room: {
       readonly id: CodecTypes['pg/text@1']['output'];
@@ -640,6 +637,7 @@ export type FieldInputTypes = {
         | 'failed';
       readonly decisionExpiresAt:
         CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly simulatePartialFailure: CodecTypes['pg/bool@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
@@ -685,8 +683,6 @@ export type FieldInputTypes = {
       readonly destination: CodecTypes['pg/text@1']['input'];
       readonly departureDate: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly passengers: CodecTypes['pg/int4@1']['input'];
-      readonly simulateTakenByOther: CodecTypes['pg/bool@1']['input'];
-      readonly simulatedTakenCount: CodecTypes['pg/int4@1']['input'];
     };
     readonly FraudBlacklist: {
       readonly userId: CodecTypes['pg/text@1']['input'];
@@ -707,8 +703,6 @@ export type FieldInputTypes = {
       readonly checkIn: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly checkOut: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly rooms: CodecTypes['pg/int4@1']['input'];
-      readonly simulateTakenByOther: CodecTypes['pg/bool@1']['input'];
-      readonly simulatedTakenCount: CodecTypes['pg/int4@1']['input'];
     };
     readonly Room: {
       readonly id: CodecTypes['pg/text@1']['input'];
@@ -730,6 +724,7 @@ export type StorageColumnTypes = {
       readonly decision_expires_at:
         CodecTypes['pg/timestamptz-string@1']['output'] | null;
       readonly id: CodecTypes['pg/text@1']['output'];
+      readonly simulate_partial_failure: CodecTypes['pg/bool@1']['output'];
       readonly status:
         | 'in_progress'
         | 'awaiting_user_decision'
@@ -781,8 +776,6 @@ export type StorageColumnTypes = {
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly origin: CodecTypes['pg/text@1']['output'];
       readonly passengers: CodecTypes['pg/int4@1']['output'];
-      readonly simulate_taken_by_other: CodecTypes['pg/bool@1']['output'];
-      readonly simulated_taken_count: CodecTypes['pg/int4@1']['output'];
     };
     readonly fraud_blacklist: {
       readonly user_id: CodecTypes['pg/text@1']['output'];
@@ -803,8 +796,6 @@ export type StorageColumnTypes = {
       readonly room_id: CodecTypes['pg/text@1']['output'] | null;
       readonly room_type: CodecTypes['pg/text@1']['output'] | null;
       readonly rooms: CodecTypes['pg/int4@1']['output'];
-      readonly simulate_taken_by_other: CodecTypes['pg/bool@1']['output'];
-      readonly simulated_taken_count: CodecTypes['pg/int4@1']['output'];
     };
     readonly room: {
       readonly hotel_id: CodecTypes['pg/text@1']['output'];
@@ -826,6 +817,7 @@ export type StorageColumnInputTypes = {
       readonly decision_expires_at:
         CodecTypes['pg/timestamptz-string@1']['input'] | null;
       readonly id: CodecTypes['pg/text@1']['input'];
+      readonly simulate_partial_failure: CodecTypes['pg/bool@1']['input'];
       readonly status:
         | 'in_progress'
         | 'awaiting_user_decision'
@@ -877,8 +869,6 @@ export type StorageColumnInputTypes = {
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly origin: CodecTypes['pg/text@1']['input'];
       readonly passengers: CodecTypes['pg/int4@1']['input'];
-      readonly simulate_taken_by_other: CodecTypes['pg/bool@1']['input'];
-      readonly simulated_taken_count: CodecTypes['pg/int4@1']['input'];
     };
     readonly fraud_blacklist: {
       readonly user_id: CodecTypes['pg/text@1']['input'];
@@ -899,8 +889,6 @@ export type StorageColumnInputTypes = {
       readonly room_id: CodecTypes['pg/text@1']['input'] | null;
       readonly room_type: CodecTypes['pg/text@1']['input'] | null;
       readonly rooms: CodecTypes['pg/int4@1']['input'];
-      readonly simulate_taken_by_other: CodecTypes['pg/bool@1']['input'];
-      readonly simulated_taken_count: CodecTypes['pg/int4@1']['input'];
     };
     readonly room: {
       readonly hotel_id: CodecTypes['pg/text@1']['input'];
@@ -975,6 +963,15 @@ type ContractBase = Omit<
                   readonly nativeType: 'timestamptz';
                   readonly codecId: 'pg/timestamptz-string@1';
                   readonly nullable: true;
+                };
+                readonly simulate_partial_failure: {
+                  readonly nativeType: 'bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
                 };
                 readonly created_at: {
                   readonly nativeType: 'timestamptz';
@@ -1269,24 +1266,6 @@ type ContractBase = Omit<
                     readonly value: DefaultLiteralValue<'pg/int4@1', 1>;
                   };
                 };
-                readonly simulate_taken_by_other: {
-                  readonly nativeType: 'bool';
-                  readonly codecId: 'pg/bool@1';
-                  readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
-                  };
-                };
-                readonly simulated_taken_count: {
-                  readonly nativeType: 'int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
-                  };
-                };
               };
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [];
@@ -1403,24 +1382,6 @@ type ContractBase = Omit<
                   readonly default: {
                     readonly kind: 'literal';
                     readonly value: DefaultLiteralValue<'pg/int4@1', 1>;
-                  };
-                };
-                readonly simulate_taken_by_other: {
-                  readonly nativeType: 'bool';
-                  readonly codecId: 'pg/bool@1';
-                  readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
-                  };
-                };
-                readonly simulated_taken_count: {
-                  readonly nativeType: 'int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
                   };
                 };
               };
@@ -1654,6 +1615,13 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamptz-string@1';
                 };
               };
+              readonly simulatePartialFailure: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/bool@1';
+                };
+              };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
@@ -1713,6 +1681,9 @@ type ContractBase = Omit<
                 readonly status: { readonly column: 'status' };
                 readonly decisionExpiresAt: {
                   readonly column: 'decision_expires_at';
+                };
+                readonly simulatePartialFailure: {
+                  readonly column: 'simulate_partial_failure';
                 };
                 readonly createdAt: { readonly column: 'created_at' };
                 readonly updatedAt: { readonly column: 'updated_at' };
@@ -2033,20 +2004,6 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/int4@1';
                 };
               };
-              readonly simulateTakenByOther: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/bool@1';
-                };
-              };
-              readonly simulatedTakenCount: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/int4@1';
-                };
-              };
             };
             readonly relations: {
               readonly booking: {
@@ -2084,12 +2041,6 @@ type ContractBase = Omit<
                 readonly destination: { readonly column: 'destination' };
                 readonly departureDate: { readonly column: 'departure_date' };
                 readonly passengers: { readonly column: 'passengers' };
-                readonly simulateTakenByOther: {
-                  readonly column: 'simulate_taken_by_other';
-                };
-                readonly simulatedTakenCount: {
-                  readonly column: 'simulated_taken_count';
-                };
               };
             };
           };
@@ -2231,20 +2182,6 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/int4@1';
                 };
               };
-              readonly simulateTakenByOther: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/bool@1';
-                };
-              };
-              readonly simulatedTakenCount: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/int4@1';
-                };
-              };
             };
             readonly relations: {
               readonly booking: {
@@ -2284,12 +2221,6 @@ type ContractBase = Omit<
                 readonly checkIn: { readonly column: 'check_in' };
                 readonly checkOut: { readonly column: 'check_out' };
                 readonly rooms: { readonly column: 'rooms' };
-                readonly simulateTakenByOther: {
-                  readonly column: 'simulate_taken_by_other';
-                };
-                readonly simulatedTakenCount: {
-                  readonly column: 'simulated_taken_count';
-                };
               };
             };
           };

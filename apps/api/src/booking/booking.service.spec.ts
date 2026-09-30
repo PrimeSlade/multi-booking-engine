@@ -319,6 +319,39 @@ describe('BookingService', () => {
 
       expect(result.id).toBe('booking-uuid-1');
     });
+
+    it('should store simulateTakenByOther on each item that asks for it', async () => {
+      await service.publish({
+        userId: 'user-123',
+        products: [
+          {
+            type: 'flight',
+            flightId: 'flight-ba-178',
+            origin: 'NYC',
+            destination: 'LAX',
+            departureDate: '2026-10-01T00:00:00.000Z',
+            simulateTakenByOther: true,
+          },
+          {
+            type: 'hotel',
+            hotelId: 'hotel-london-grand',
+            roomId: 'room-ldn-101',
+            city: 'London',
+            checkIn: '2026-10-01T15:00:00.000Z',
+            checkOut: '2026-10-03T11:00:00.000Z',
+          },
+        ],
+      });
+
+      expect(
+        mockPrisma.db.orm.public.FlightBooking.create,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({ simulateTakenByOther: true }),
+      );
+      expect(mockPrisma.db.orm.public.HotelBooking.create).toHaveBeenCalledWith(
+        expect.objectContaining({ simulateTakenByOther: false }),
+      );
+    });
   });
 
   describe('findById', () => {

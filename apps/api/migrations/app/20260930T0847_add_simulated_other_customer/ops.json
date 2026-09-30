@@ -1,0 +1,170 @@
+[
+  {
+    "id": "column.public.flight_booking.simulate_taken_by_other",
+    "label": "Add column \"simulate_taken_by_other\" to \"flight_booking\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "simulate_taken_by_other",
+        "table": "flight_booking"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"simulate_taken_by_other\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "flight_booking",
+          "simulate_taken_by_other"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"simulate_taken_by_other\"",
+        "sql": "ALTER TABLE \"public\".\"flight_booking\" ADD COLUMN \"simulate_taken_by_other\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"simulate_taken_by_other\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "flight_booking",
+          "simulate_taken_by_other"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.flight_booking.simulated_taken_count",
+    "label": "Add column \"simulated_taken_count\" to \"flight_booking\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "simulated_taken_count",
+        "table": "flight_booking"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"simulated_taken_count\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "flight_booking",
+          "simulated_taken_count"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"simulated_taken_count\"",
+        "sql": "ALTER TABLE \"public\".\"flight_booking\" ADD COLUMN \"simulated_taken_count\" int4 DEFAULT 0 NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"simulated_taken_count\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "flight_booking",
+          "simulated_taken_count"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.hotel_booking.simulate_taken_by_other",
+    "label": "Add column \"simulate_taken_by_other\" to \"hotel_booking\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "simulate_taken_by_other",
+        "table": "hotel_booking"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"simulate_taken_by_other\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "hotel_booking",
+          "simulate_taken_by_other"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"simulate_taken_by_other\"",
+        "sql": "ALTER TABLE \"public\".\"hotel_booking\" ADD COLUMN \"simulate_taken_by_other\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"simulate_taken_by_other\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "hotel_booking",
+          "simulate_taken_by_other"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.hotel_booking.simulated_taken_count",
+    "label": "Add column \"simulated_taken_count\" to \"hotel_booking\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "simulated_taken_count",
+        "table": "hotel_booking"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"simulated_taken_count\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "hotel_booking",
+          "simulated_taken_count"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"simulated_taken_count\"",
+        "sql": "ALTER TABLE \"public\".\"hotel_booking\" ADD COLUMN \"simulated_taken_count\" int4 DEFAULT 0 NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"simulated_taken_count\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "hotel_booking",
+          "simulated_taken_count"
+        ]
+      }
+    ]
+  }
+]

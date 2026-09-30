@@ -1,0 +1,44 @@
+[
+  {
+    "id": "column.public.booking.simulate_partial_failure",
+    "label": "Add column \"simulate_partial_failure\" to \"booking\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "simulate_partial_failure",
+        "table": "booking"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"simulate_partial_failure\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking",
+          "simulate_partial_failure"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"simulate_partial_failure\"",
+        "sql": "ALTER TABLE \"public\".\"booking\" ADD COLUMN \"simulate_partial_failure\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"simulate_partial_failure\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking",
+          "simulate_partial_failure"
+        ]
+      }
+    ]
+  }
+]

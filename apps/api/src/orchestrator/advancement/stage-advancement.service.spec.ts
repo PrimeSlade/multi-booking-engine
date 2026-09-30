@@ -27,6 +27,9 @@ describe('StageAdvancementService', () => {
     dispatchCompensations: jest.Mock;
   };
   let mockCompensationService: { compensateSuccessfulSteps: jest.Mock };
+  let mockSimulatedCompetitor: {
+    takeMarkedItems: jest.Mock;
+  };
   let service: StageAdvancementService;
 
   // The real type is the full Prisma-generated BookingStep row (inferred
@@ -71,11 +74,15 @@ describe('StageAdvancementService', () => {
     mockCompensationService = {
       compensateSuccessfulSteps: jest.fn().mockResolvedValue(undefined),
     };
+    mockSimulatedCompetitor = {
+      takeMarkedItems: jest.fn().mockResolvedValue(undefined),
+    };
     service = new StageAdvancementService(
       mockPrisma as never,
       mockGraphService as never,
       mockDispatchService as never,
       mockCompensationService as never,
+      mockSimulatedCompetitor as never,
     );
   });
 
